@@ -1,0 +1,3 @@
+module SquareIsingModel
+
+end # module
