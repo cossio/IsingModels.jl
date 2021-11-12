@@ -8,8 +8,8 @@ The 2-dimensional Ising model is defined by the energy function:
 E(\mathbf{\sigma}) = - \sum_{\langle i j \rangle} \sigma_i \sigma_j
 ```
 
-where ``\langle i j \rangle`` refers to connected pairs of sites in the square grid lattice, and ``\sigma_i = \pm 1`` are spins. At inverse temperature
-``\beta``, this defines a Boltzmann probability distribution:
+where ``\langle i j \rangle`` refers to connected pairs of sites in the square grid lattice, and ``\sigma_i = \pm 1`` are spins.
+At inverse temperature $\beta$, this defines a Boltzmann probability distribution:
 
 ```math
 P(\mathbf{\sigma}) = \frac{1}{Z} \mathrm{e}^{-\beta E (\mathbf{\sigma})}
@@ -37,8 +37,8 @@ mavg = zeros(length(βs)) # store average magnetizations
 mstd = zeros(length(βs)) # store magnetization fluctuations
 for (k,β) in enumerate(βs)
     println("simulating β = $β ...")
-    spins = rand((Int8(1), Int8(-1)), 30, 30);
-    spins_t, m, E = metropolis!(spins, β, 5000000)
+    spins = rand((Int8(1), Int8(-1)), 50, 50);
+    spins_t, m, E = metropolis!(spins, β, 10000000)
     mavg[k] = abs(mean(m[round(Int, length(m)/2):end]))
     mstd[k] = std(m[round(Int, length(m)/2):end])
 end
