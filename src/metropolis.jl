@@ -15,7 +15,7 @@ function metropolis!(
 )
     #= We only need to evalute exp.(-β .* ΔE) for ΔE = 0, 1, 2, 3.
     Therefore we store a look-up table. =#
-    _Exp2β = ntuple(k -> exp(-2β * (k - 1)), 5)
+    _Exp2β = ntuple(x -> exp(-2β * (x - 1)), 5)
 
     #= Track history of magnetization and energy =#
     m = zeros(steps)
@@ -31,7 +31,6 @@ function metropolis!(
         i, j = rand.(Base.OneTo.(size(spins)))
         S = spins[i,j] * neighbor_sum(spins, i, j)
         ΔE = 2S
-        #ΔE ≥ 0 && @assert _Exp2β[S + 1] ≈ exp(-β * ΔE)
         if ΔE < 0 || rand() < _Exp2β[S + 1]
             m[t] = m[t - 1] - 2spins[i,j] / length(spins)
             E[t] = E[t - 1] + ΔE / length(spins)
@@ -41,6 +40,7 @@ function metropolis!(
             E[t] = E[t - 1]
         end
         if save_interval !== nothing && t % save_interval == 0
+            ΔE ≥ 0 && @assert _Exp2β[S + 1] ≈ exp(-β * ΔE)
             push!(spins_t, copy(spins))
         end
     end
