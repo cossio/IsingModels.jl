@@ -2,15 +2,15 @@
 
 function recursion_wolff(
     spins::Matrix{Int8},   # Spin grid
-    Padd::Real,
     i::Int, j::Int,     # current position
+    Padd::Real,
     cluster::BitMatrix = falses(size(spin)...) # cluster we are building
 )
     cluster[i,j] = true
     for (x, y) in neighbors(i, j, size(spins)...)
         if cluster[x,y] == false && spins[x,y] == spins[i,j]
             if rand() < Padd
-                recursion_wolff(spins, Padd, x, y, cluster)
+                recursion_wolff(spins, x, y, Padd, cluster)
             end
         end
     end

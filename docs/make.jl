@@ -6,4 +6,7 @@ makedocs(
     sitename="SquareIsingModel.jl"
 )
 
-deploydocs(repo = "github.com/cossio/SquareIsingModel.jl.git")
+deploydocs(
+    repo = "github.com/cossio/SquareIsingModel.jl.git",
+    devbranch = "main"
+)
