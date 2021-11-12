@@ -17,48 +17,42 @@ function recursion_wolff(
     return cluster
 end
 
+"""
+    wolff!(spins, β, steps = 1; save_interval = 1)
+
+Perfoms one or more Wolff MC steps from the configuration `spins`, at inverse
+temperature `β`.
+"""
 function wolff!(
     spins::Matrix{Int8},
-    β::Real;  # inverse temperature
-    iters::Integer = 30,   # Number of iterations
+    β::Real, # inverse temperature
+    steps::Integer = 1; # number of iterations
+    save_interval::Int = 1
 )
-    N, M = size(spins)
+    m = zeros(steps)
+    E = zeros(steps)
+    m[1] = mean(spins)
+    E[1] = energy(spins)
+    spins_t = [copy(spins)]
+
     Padd = 1 - exp(-2β)
-    m = Float64[]
-    for t in 1:iters
-        i, j = rand(1:N), rand(1:M)
+    for t in 2:steps
+        i, j = rand.(Base.OneTo.(size(spins)))
         cluster = recursion_wolff(spins, i, j, Padd)
-        ΔE = -2h * dot(spins, cluster)
-        # Change spin accordingly
-	    if ΔE ≤ 0 || rand() < exp(-ΔE)
-            flip!(spins, cluster)
-        end
-        Δm =
-        push!(m, mean(spins))
-    end
 
+        # change in magnetization
+        Δm = 2spins[i,j] * mean(cluster)
+        m[t] = m[t - 1] - Δm
+
+        # flip cluster
+        spins .= (1 .- 2cluster) .* spins
+
+        # compute new energy
+        E[t] = energy(spins)
+
+        if save_interval !== nothing && t % save_interval == 0
+            push!(spins_t, copy(spins))
+        end
+    end
     return m
-end
-
-"""
-    neighbors(i, j, N, M = N)
-
-Returns the list of neighbors of site `(i,j)` in the 2-dimensional lattice grid with sides
-`N x M`. That is, the sites `((i+1,j), (i-1,j), (i,j+1), (i,j-1))`, but considering the
-periodic bounary conditions at the edges.
-"""
-function neighbors(i::Int, j::Int, N::Int, M::Int = N)
-    @assert 1 ≤ i ≤ N && 1 ≤ j ≤ M
-    return ((mod1(i + 1, N), j),
-            (mod1(i - 1, N), j),
-            (i, mod1(j + 1, M)),
-            (i, mod1(j - 1, M)))
-end
-
-function flip!(grid::Array{Int, 2}, cluster::BitArray{2})
-    for j in 1:size(grid, 2), i in 1:size(grid, 1)
-        if cluster[i, j] == true
-            grid[i, j] *= -1
-        end
-    end
 end
