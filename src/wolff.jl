@@ -4,7 +4,7 @@ function recursion_wolff(
     spins::Matrix{Int8},   # Spin grid
     i::Int, j::Int,     # current position
     Padd::Real,
-    cluster::BitMatrix = falses(size(spin)...) # cluster we are building
+    cluster::BitMatrix = falses(size(spins)...) # cluster we are building
 )
     cluster[i,j] = true
     for (x, y) in neighbors(i, j, size(spins)...)
@@ -32,7 +32,7 @@ function wolff!(
     m = zeros(steps)
     E = zeros(steps)
     m[1] = mean(spins)
-    E[1] = energy(spins)
+    E[1] = energy(spins) / length(spins)
     spins_t = [copy(spins)]
 
     Padd = 1 - exp(-2β)
@@ -48,11 +48,11 @@ function wolff!(
         spins .= (1 .- 2cluster) .* spins
 
         # compute new energy
-        E[t] = energy(spins)
+        E[t] = energy(spins) / length(spins)
 
         if save_interval !== nothing && t % save_interval == 0
             push!(spins_t, copy(spins))
         end
     end
-    return m
+    return spins_t, m, E
 end
