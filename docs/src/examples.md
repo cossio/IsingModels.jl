@@ -8,16 +8,16 @@ using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
 
-βs = 0:0.05:1 # inverse temperatures to simulate
+βs = 0:0.05:1
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
-spins = Ising.random_configuration(50)
+spins = rand((Int8(1), Int8(-1)), 50, 50);
 @showprogress for (k,β) in enumerate(βs)
     spins_t, m, E = Ising.metropolis!(spins, β, 10^7)
-    mavg[k] = mean(m[(length(m) ÷ 2):end])
-    mstd[k] = std(m[(length(m) ÷ 2):end])
+    m_ = abs.(m[(length(m) ÷ 2):end])
+    mavg[k] = mean(m_)
+    mstd[k] = std(m_)
 end
-mavg .= abs.(mavg) # remove sign invariance
 
 fig = Figure(resolution=(600,400))
 ax = Axis(fig[1,1], xlabel="β", ylabel="m")
@@ -42,10 +42,10 @@ mstd = zeros(length(βs))
 spins = Ising.random_configuration(70)
 @showprogress for (k,β) in enumerate(βs)
     spins_t, m, E = Ising.wolff!(spins, β, 10^3)
-    mavg[k] = mean(abs.(m[(length(m) ÷ 2):end]))
-    mstd[k] = std(abs.(m[(length(m) ÷ 2):end]))
+    m_ = abs.(m[(length(m) ÷ 2):end])
+    mavg[k] = mean(m_)
+    mstd[k] = std(m_)
 end
-mavg .= abs.(mavg) # remove sign invariance
 
 fig = Figure(resolution=(600,400))
 ax = Axis(fig[1,1], xlabel="β", ylabel="m")
@@ -67,7 +67,7 @@ Random.seed!(69) # reproducibility
 β = 0.6
 spins = Ising.random_configuration(50)
 Ising.metropolis!(spins, β, 10^7)
-cluster = Ising.wolff_cluster(spins, 25, 25, 1 - exp(-2β))
+cluster = Ising.wolff_cluster(spins, 25, 25, Ising.wolff_padd(β))
 
 fig = Figure(resolution=(700, 300))
 
