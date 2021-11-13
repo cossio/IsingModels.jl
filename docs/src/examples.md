@@ -65,7 +65,7 @@ using Random, Colors, ColorSchemes, CairoMakie
 Random.seed!(69) # reproducibility
 
 β = 0.6
-spins = Ising.random_configuration(50, 50)
+spins = Ising.random_configuration(50)
 Ising.metropolis!(spins, β, 10^7)
 cluster = Ising.wolff_cluster(spins, 25, 25, 1 - exp(-2β))
 
