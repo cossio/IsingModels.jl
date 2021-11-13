@@ -17,6 +17,22 @@ function recursion_wolff(
     return cluster
 end
 
+function wolff_cluster(spins::Matrix{Int8}, i::Int, j::Int, Padd::Real)
+    cluster = falses(size(spins)...)
+    cluster[i,j] = true
+    queue = [(i,j)]
+    while !isempty(queue)
+        (i,j) = pop!(queue)
+        for (x,y) in neighbors(i, j, size(spins)...)
+            if cluster[x,y] == false && spins[x,y] == spins[i,j] && rand() < Padd
+                cluster[x,y] = true
+                push!(queue, (x,y))
+            end
+        end
+    end
+    return cluster
+end
+
 """
     wolff!(spins, β, steps = 1; save_interval = 1)
 

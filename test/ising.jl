@@ -7,6 +7,6 @@ include("init.jl")
     @test iszero(Ising.onsager_magnetization(0.1))
     @test Ising.onsager_magnetization(100) ≈ 1
 
-    spins = rand((Int8(-1), Int8(1)), 50, 50)
-    @test neighbor_sum(spins, 5, 5) == spins[5,4] + spins[5,6] + spins[4,5] + spins[6,5]
+    s = Ising.random_configuration(50, 50)
+    @test Ising.neighbor_sum(s, 5, 5) == s[5,4] + s[5,6] + s[4,5] + s[6,5]
 end
