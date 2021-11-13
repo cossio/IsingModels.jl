@@ -1,4 +1,4 @@
-function wolff_cluster(spins::Matrix{Int8}, i::Int, j::Int, Padd::Real)
+function wolff_cluster(spins::Matrix{Int8}, i::Int, j::Int, Padd::Real = 1)
     cluster = falses(size(spins)...)
     cluster[i,j] = true
     queue = [(i,j)]
@@ -32,7 +32,7 @@ function wolff!(
     E[1] = energy(spins) / length(spins)
     spins_t = [copy(spins)]
 
-    Padd = 1 - exp(-2β)
+    Padd = wolff_padd(β)
     for t in 2:steps
         i, j = rand.(Base.OneTo.(size(spins)))
         cluster = wolff_cluster(spins, i, j, Padd)
@@ -53,3 +53,5 @@ function wolff!(
     end
     return spins_t, m, E
 end
+
+wolff_padd(β::Real) = -expm1(-2β)
