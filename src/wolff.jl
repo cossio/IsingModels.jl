@@ -1,22 +1,3 @@
-#= Based on https://github.com/prcastro/IsingLite.jl/blob/master/src/wolff.jl =#
-
-function recursion_wolff(
-    spins::Matrix{Int8},   # Spin grid
-    i::Int, j::Int,     # current position
-    Padd::Real,
-    cluster::BitMatrix = falses(size(spins)...) # cluster we are building
-)
-    cluster[i,j] = true
-    for (x, y) in neighbors(i, j, size(spins)...)
-        if cluster[x,y] == false && spins[x,y] == spins[i,j]
-            if rand() < Padd
-                recursion_wolff(spins, x, y, Padd, cluster)
-            end
-        end
-    end
-    return cluster
-end
-
 function wolff_cluster(spins::Matrix{Int8}, i::Int, j::Int, Padd::Real)
     cluster = falses(size(spins)...)
     cluster[i,j] = true
@@ -24,7 +5,7 @@ function wolff_cluster(spins::Matrix{Int8}, i::Int, j::Int, Padd::Real)
     while !isempty(queue)
         (i,j) = pop!(queue)
         for (x,y) in neighbors(i, j, size(spins)...)
-            if cluster[x,y] == false && spins[x,y] == spins[i,j] && rand() < Padd
+            if !cluster[x,y] && spins[x,y] == spins[i,j] && rand() < Padd
                 cluster[x,y] = true
                 push!(queue, (x,y))
             end
@@ -54,7 +35,7 @@ function wolff!(
     Padd = 1 - exp(-2β)
     for t in 2:steps
         i, j = rand.(Base.OneTo.(size(spins)))
-        cluster = recursion_wolff(spins, i, j, Padd)
+        cluster = wolff_cluster(spins, i, j, Padd)
 
         # change in magnetization
         Δm = 2spins[i,j] * mean(cluster)
