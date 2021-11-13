@@ -11,7 +11,7 @@ Random.seed!(1) # make reproducible
 βs = 0:0.05:1 # inverse temperatures to simulate
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
-spins = Ising.random_configuration(50, 50)
+spins = Ising.random_configuration(50)
 @showprogress for (k,β) in enumerate(βs)
     spins_t, m, E = Ising.metropolis!(spins, β, 10^7)
     mavg[k] = mean(m[(length(m) ÷ 2):end])
@@ -36,14 +36,14 @@ using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
 
-βs = 0:0.05:1 # inverse temperatures to simulate
+βs = 0:0.05:1
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
-spins = Ising.random_configuration(50, 50)
+spins = Ising.random_configuration(70)
 @showprogress for (k,β) in enumerate(βs)
     spins_t, m, E = Ising.wolff!(spins, β, 10^3)
-    mavg[k] = mean(m[(length(m) ÷ 2):end])
-    mstd[k] = std(m[(length(m) ÷ 2):end])
+    mavg[k] = mean(abs.(m[(length(m) ÷ 2):end]))
+    mstd[k] = std(abs.(m[(length(m) ÷ 2):end]))
 end
 mavg .= abs.(mavg) # remove sign invariance
 
