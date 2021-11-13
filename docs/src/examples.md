@@ -8,7 +8,7 @@ using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
 
-βs = 0:0.05:1
+βs = 0:0.01:1
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = rand((Int8(1), Int8(-1)), 50, 50);
@@ -36,7 +36,7 @@ using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
 
-βs = 0:0.05:1
+βs = 0:0.01:1
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(70)
