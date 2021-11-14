@@ -1,5 +1,6 @@
 # Examples
 
+
 ## [Example simulation with Metropolis](@id example_metropolis)
 
 ```@example
@@ -42,6 +43,7 @@ axislegend(ax, position=:rb)
 fig
 ```
 
+
 ## [Example simulation with Wolff](@id example_wolff)
 
 ```@example
@@ -83,6 +85,7 @@ axislegend(ax, position=:rb)
 fig
 ```
 
+
 ## Example Wolff clusters
 
 ```@example
@@ -108,5 +111,49 @@ hmap = heatmap!(ax, cluster, colormap=cgrad([:white, :black], [0.5]; categorical
 cbar = Colorbar(fig[1, 4], hmap)
 cbar.ticks = ([0.25, 0.75], ["0", "1"])
 
+fig
+```
+
+
+## Average size of Wolff's clusters
+
+```@example
+import SquareIsingModel as Ising
+using Random, Colors, ColorSchemes, CairoMakie
+
+Random.seed!(1) # make reproducible
+
+Ts = 0:0.2:5
+βs = inv.(Ts)
+fig = Figure(resolution=(600,400))
+ax = Axis(fig[1,1], xlabel=L"temperature $T$", ylabel=L"average Wolff's cluster size / $N$")
+
+clavg = zeros(length(βs))
+clstd = zeros(length(βs))
+spins = Ising.random_configuration(30)
+@showprogress for (k,β) in enumerate(βs)
+    spins_t, m, E = Ising.wolff!(spins, β, 10^3)
+    cluster_size = abs.(m[2:end] - m[1:(end - 1)]) .* length(spins) / 2
+    clavg[k] = mean(cluster_size / length(spins))
+    clstd[k] = std(cluster_size / length(spins))
+end
+scatter!(ax, Ts, clavg, color=:blue, markersize=5, label="L=30")
+lines!(ax, Ts, clavg, color=:blue)
+errorbars!(ax, Ts, clavg, clstd/2, color=:blue, whiskerwidth=5)
+
+clavg = zeros(length(βs))
+clstd = zeros(length(βs))
+spins = Ising.random_configuration(70)
+@showprogress for (k,β) in enumerate(βs)
+    spins_t, m, E = Ising.wolff!(spins, β, 10^3)
+    cluster_size = abs.(m[2:end] - m[1:(end - 1)]) .* length(spins) / 2
+    clavg[k] = mean(cluster_size / length(spins))
+    clstd[k] = std(cluster_size / length(spins))
+end
+scatter!(ax, Ts, clavg, color=:red, markersize=5, label="L=70")
+lines!(ax, Ts, clavg, color=:red)
+errorbars!(ax, Ts, clavg, clstd/2, color=:red, whiskerwidth=5)
+
+axislegend(ax, position=:rt)
 fig
 ```
