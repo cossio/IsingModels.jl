@@ -25,3 +25,9 @@ In the two-dimensional grid lattice, we assume we have a $L\times K$ plane grid,
 We assume periodic boundary conditions, so spin `(1,1)` is connected to spin `(L,K)`.
 
 In the thermodynamic limit (large `L` with `K = L`), this model suffers a phase transition at the critical inverse temperature $\beta \approx 0.44$ (called [`βc`](@ref) in the package).
+
+In this package, the system is simulated using the Metropolis algorithm or the Wolff cluster algorithm, both explained here:
+
+```
+Newman, Mark EJ, and G. T. Barkema. "Monte Carlo Methods in Statistical Physics (1999)." New York: Oxford 475 (1999).
+```
