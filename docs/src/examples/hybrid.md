@@ -65,3 +65,8 @@ for t ∈ 1:T
 end
 fig
 ```
+
+In the figure above, each row is a sequence of consecutive Metropolis steps.
+Inside a row the configurations are very similar differing in single sites.
+When the row ends, a Wolff cluster move is taken.
+It can be seen that the next row has suffered a larger change, since a cluster was flipped.
