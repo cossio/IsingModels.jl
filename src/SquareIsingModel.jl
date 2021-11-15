@@ -6,4 +6,5 @@ module SquareIsingModel
 
     include("metropolis.jl")
     include("wolff.jl")
+    include("hybrid.jl")
 end # module
