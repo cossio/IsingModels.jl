@@ -1,4 +1,4 @@
-function wolff_cluster(spins::Matrix{Int8}, i::Int, j::Int, Padd::Real = 1)
+function wolff_cluster(spins::AbstractMatrix{Int8}, i::Int, j::Int, Padd::Real = 1)
     cluster = falses(size(spins)...)
     cluster[i,j] = true
     queue = [(i,j)]
@@ -21,7 +21,7 @@ Perfoms one or more Wolff MC steps from the configuration `spins`, at inverse
 temperature `β`.
 """
 function wolff!(
-    spins::Matrix{Int8},
+    spins::AbstractMatrix{Int8},
     β::Real, # inverse temperature
     steps::Integer = 1; # number of iterations
     save_interval::Int = 1
@@ -30,7 +30,8 @@ function wolff!(
     E = zeros(Int, steps)
     M[1] = sum(spins)
     E[1] = energy(spins)
-    spins_t = [copy(spins)]
+    spins_t = zeros(Int8, size(spins)..., length(1:save_interval:steps))
+    spins_t[:,:,1] .= spins
 
     Padd = wolff_padd(β)
     for t in 2:steps
@@ -47,8 +48,8 @@ function wolff!(
         # compute new energy
         E[t] = energy(spins)
 
-        if save_interval !== nothing && t % save_interval == 0
-            push!(spins_t, copy(spins))
+        if t ∈ 1:save_interval:steps
+            spins_t[:, :, cld(t, save_interval)] .= spins
         end
     end
     return spins_t, M, E
