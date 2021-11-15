@@ -1,5 +1,11 @@
 include("init.jl")
 
+@testset "metropolis acceptance probabilities" begin
+    β = Ising.βc
+    _Exp2β = Ising.precompute_metropolis_probs(β)
+    @test length(_Exp2β) == 5
+end
+
 @testset "metropolis" begin
     L = 50; T = 100; Δ = 12; β = 1.0
     spins = Ising.random_configuration(L)
