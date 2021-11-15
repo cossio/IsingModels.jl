@@ -121,7 +121,7 @@ fig
 
 ```@example
 import SquareIsingModel as Ising
-using Random, Colors, ColorSchemes, CairoMakie
+using Random, Colors, ColorSchemes, CairoMakie, ProgressMeter
 
 Random.seed!(1) # make reproducible
 
