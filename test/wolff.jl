@@ -9,7 +9,7 @@ end
 @testset "wolff" begin
     spins = Ising.random_configuration(50)
     spins_t, m, E = @inferred Ising.wolff!(spins, 1.0, 10)
-    @test m[end] ≈ mean(spins)
+    @test round(Int, m[end] * length(spins)) == sum(spins)
     @test E[end] ≈ Ising.energy(spins) / length(spins)
 end
 
