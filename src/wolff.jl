@@ -35,24 +35,29 @@ function wolff!(
 
     Padd = wolff_padd(β)
     for t in 2:steps
-        i, j = rand.(Base.OneTo.(size(spins)))
-        cluster = wolff_cluster(spins, i, j, Padd)
-
-        # change in magnetization
-        ΔM = 2spins[i,j] * sum(cluster)
-        M[t] = M[t - 1] - ΔM
-
-        # flip cluster
-        spins .= (1 .- 2cluster) .* spins
-
-        # compute new energy
-        E[t] = energy(spins)
-
+        wolff_step!(spins; t = t, M = M, E = E, Padd = Padd)
         if t ∈ 1:save_interval:steps
             spins_t[:, :, cld(t, save_interval)] .= spins
         end
     end
     return spins_t, M, E
+end
+
+function wolff_step!(spins; t, M, E, Padd)
+    i, j = rand.(Base.OneTo.(size(spins)))
+    cluster = wolff_cluster(spins, i, j, Padd)
+
+    # change in magnetization
+    ΔM = 2spins[i,j] * sum(cluster)
+    M[t] = M[t - 1] - ΔM
+
+    # flip cluster
+    spins .= (1 .- 2cluster) .* spins
+
+    # compute new energy
+    E[t] = energy(spins)
+
+    return nothing
 end
 
 wolff_padd(β::Real) = -expm1(-2β)

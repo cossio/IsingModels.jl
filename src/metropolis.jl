@@ -17,7 +17,7 @@ function metropolis!(
 
     #= We only need to evalute exp.(-β .* ΔE) for ΔE = 0, 1, 2, 3.
     Therefore we store a look-up table. =#
-    _Exp2β = precompute_metropolis_probs(β)
+    _Exp2β = metropolis_acceptance_probabilities(β)
 
     #= Track history of magnetization and energy =#
     M = zeros(Int, steps)
@@ -31,16 +31,7 @@ function metropolis!(
     spins_t[:,:,1] .= spins
 
     for t ∈ 2:steps
-        i, j = rand.(Base.OneTo.(size(spins)))
-        S = spins[i,j] * neighbor_sum(spins, i, j)
-        if S < 0 || rand() < _Exp2β[S + 1]
-            M[t] = M[t - 1] - 2spins[i,j]
-            E[t] = E[t - 1] + 2S
-            spins[i,j] = -spins[i,j]
-        else
-            M[t] = M[t - 1]
-            E[t] = E[t - 1]
-        end
+        metropolis_step!(spins; t = t, M = M, E = E, _Exp2β = _Exp2β)
         if t ∈ 1:save_interval:steps
             spins_t[:, :, cld(t, save_interval)] .= spins
         end
@@ -49,4 +40,18 @@ function metropolis!(
     return spins_t, M, E
 end
 
-precompute_metropolis_probs(β::Real) = ntuple(x -> exp(-2β * (x - 1)), 5)
+function metropolis_step!(spins; t, M, E, _Exp2β)
+    i, j = rand.(Base.OneTo.(size(spins)))
+    S = spins[i,j] * neighbor_sum(spins, i, j)
+    if S < 0 || rand() < _Exp2β[S + 1]
+        M[t] = M[t - 1] - 2spins[i,j]
+        E[t] = E[t - 1] + 2S
+        spins[i,j] = -spins[i,j]
+    else
+        M[t] = M[t - 1]
+        E[t] = E[t - 1]
+    end
+    return nothing
+end
+
+metropolis_acceptance_probabilities(β::Real) = ntuple(x -> exp(-2β * (x - 1)), 5)

@@ -2,7 +2,7 @@ include("init.jl")
 
 @testset "metropolis acceptance probabilities" begin
     β = Ising.βc
-    _Exp2β = Ising.precompute_metropolis_probs(β)
+    _Exp2β = Ising.metropolis_acceptance_probabilities(β)
     @test length(_Exp2β) == 5
 end
 
