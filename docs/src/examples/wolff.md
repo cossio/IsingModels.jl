@@ -1,7 +1,7 @@
 # Examples using Wolff cluster sampling method
 
 
-## [Magnetization as a function of temperature]
+## Magnetization as a function of temperature
 
 ```@example
 import SquareIsingModel as Ising
