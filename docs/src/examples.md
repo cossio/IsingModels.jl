@@ -92,12 +92,14 @@ fig
 import SquareIsingModel as Ising
 using Random, Colors, ColorSchemes, CairoMakie
 
-Random.seed!(69) # reproducibility
+Random.seed!(62) # reproducibility
 
-β = 0.6
-spins = Ising.random_configuration(50)
+β = Ising.βc
+spins = Ising.random_configuration(400)
 Ising.metropolis!(spins, β, 10^7)
-cluster = Ising.wolff_cluster(spins, 25, 25, Ising.wolff_padd(β))
+Ising.wolff!(spins, β, 200)
+
+cluster = Ising.wolff_cluster(spins, 200, 200, Ising.wolff_padd(β))
 
 fig = Figure(resolution=(700, 300))
 
