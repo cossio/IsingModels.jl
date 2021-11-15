@@ -70,3 +70,38 @@ In the figure above, each row is a sequence of consecutive Metropolis steps.
 Inside a row the configurations are very similar differing in single sites.
 When the row ends, a Wolff cluster move is taken.
 It can be seen that the next row has suffered a larger change, since a cluster was flipped.
+
+
+## Magnetic susceptibility
+
+```@example
+using Statistics, CairoMakie, Random, ProgressMeter
+import SquareIsingModel as Ising
+
+Random.seed!(1) # make reproducible
+
+βs = 0:0.025:1
+fig = Figure(resolution=(600,400))
+ax = Axis(fig[1,1], xlabel="β", ylabel="χ")
+
+χ = zeros(length(βs))
+spins = Ising.random_configuration(30)
+@showprogress for (k,β) in enumerate(βs)
+    spins_t, m, E = Ising.hybrid!(spins, β, 10^7)
+    M = sum(spins_t; dims=(1,2))
+    χ[k] = β/length(spins) * (mean(M.^2) - mean(abs.(M))^2)
+end
+lines!(ax, βs, χ, color=:blue, markersize=5, label="L=30")
+
+χ = zeros(length(βs))
+spins = Ising.random_configuration(70)
+@showprogress for (k,β) in enumerate(βs)
+    spins_t, m, E = Ising.hybrid!(spins, β, 10^7)
+    M = sum(spins_t; dims=(1,2))
+    χ[k] = β/length(spins) * (mean(M.^2) - mean(abs.(M))^2)
+end
+lines!(ax, βs, χ, color=:red, markersize=5, label="L=70")
+
+axislegend(ax, position=:rt)
+fig
+```
