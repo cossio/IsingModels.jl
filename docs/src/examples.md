@@ -19,10 +19,10 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(20)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.metropolis!(spins, β, 10^7)
-    m_ = abs.(m[(length(m) ÷ 2):end])
-    mavg[k] = mean(m_)
-    mstd[k] = std(m_)
+    spins_t, M, E = Ising.metropolis!(spins, β, 10^7)
+    m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
+    mavg[k] = mean(m)
+    mstd[k] = std(m)
 end
 scatter!(ax, βs, mavg, color=:blue, markersize=5, label="MC, L=20")
 errorbars!(ax, βs, mavg, mstd/2, color=:blue, whiskerwidth=5)
@@ -31,10 +31,10 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(50)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.metropolis!(spins, β, 10^7)
-    m_ = abs.(m[(length(m) ÷ 2):end])
-    mavg[k] = mean(m_)
-    mstd[k] = std(m_)
+    spins_t, M, E = Ising.metropolis!(spins, β, 10^7)
+    m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
+    mavg[k] = mean(m)
+    mstd[k] = std(m)
 end
 scatter!(ax, βs, mavg, color=:red, markersize=5, label="MC, L=50")
 errorbars!(ax, βs, mavg, mstd/2, color=:red, whiskerwidth=5)
@@ -61,10 +61,10 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(30)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.wolff!(spins, β, 10^3)
-    m_ = abs.(m[(length(m) ÷ 2):end])
-    mavg[k] = mean(m_)
-    mstd[k] = std(m_)
+    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
+    mavg[k] = mean(m)
+    mstd[k] = std(m)
 end
 scatter!(ax, βs, mavg, color=:blue, markersize=5, label="MC, L=30")
 errorbars!(ax, βs, mavg, mstd/2, color=:blue, whiskerwidth=5)
@@ -73,10 +73,10 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(70)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.wolff!(spins, β, 10^3)
-    m_ = abs.(m[(length(m) ÷ 2):end])
-    mavg[k] = mean(m_)
-    mstd[k] = std(m_)
+    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
+    mavg[k] = mean(m)
+    mstd[k] = std(m)
 end
 scatter!(ax, βs, mavg, color=:red, markersize=5, label="MC, L=70")
 errorbars!(ax, βs, mavg, mstd/2, color=:red, whiskerwidth=5)
@@ -121,7 +121,7 @@ fig
 
 ```@example
 import SquareIsingModel as Ising
-using Random, Colors, ColorSchemes, CairoMakie, ProgressMeter
+using Random, Statistics, Colors, ColorSchemes, CairoMakie, ProgressMeter
 
 Random.seed!(1) # make reproducible
 
@@ -134,8 +134,8 @@ clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 spins = Ising.random_configuration(30)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.wolff!(spins, β, 10^3)
-    cluster_size = abs.(m[2:end] - m[1:(end - 1)]) .* length(spins) / 2
+    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(spins))
     clstd[k] = std(cluster_size / length(spins))
 end
@@ -147,8 +147,8 @@ clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 spins = Ising.random_configuration(70)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.wolff!(spins, β, 10^3)
-    cluster_size = abs.(m[2:end] - m[1:(end - 1)]) .* length(spins) / 2
+    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(spins))
     clstd[k] = std(cluster_size / length(spins))
 end

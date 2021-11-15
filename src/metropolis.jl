@@ -3,10 +3,9 @@
 
 Perfoms one or more Metropolis MC steps from the configuration `spins`, at inverse
 temperature `β`.
-Returns three lists: `spins_t, m, E`, where `spins_t` contains configurations
+Returns three lists: `spins_t, M, E`, where `spins_t` contains configurations
 sampled at intervals `save_interval` (by default equals the number of sites),
-`m` is the record of magnetizations, and `E` the record of energies (divided by
-number of sites).
+`M` is the record of magnetizations, and `E` the record of energies.
 """
 function metropolis!(
     spins::Matrix{Int8},
@@ -18,11 +17,11 @@ function metropolis!(
     _Exp2β = ntuple(x -> exp(-2β * (x - 1)), 5)
 
     #= Track history of magnetization and energy =#
-    m = zeros(steps)
-    E = zeros(steps)
+    M = zeros(Int, steps)
+    E = zeros(Int, steps)
 
-    m[1] = mean(spins) # magnetization
-    E[1] = energy(spins) / length(spins) # energy per spin
+    M[1] = sum(spins) # magnetization
+    E[1] = energy(spins)
 
     #= Track the history of configurations only every 'save_interval' steps. =#
     spins_t = [copy(spins)]
@@ -32,11 +31,11 @@ function metropolis!(
         S = spins[i,j] * neighbor_sum(spins, i, j)
         ΔE = 2S
         if ΔE < 0 || rand() < _Exp2β[S + 1]
-            m[t] = m[t - 1] - 2spins[i,j] / length(spins)
-            E[t] = E[t - 1] + ΔE / length(spins)
+            M[t] = M[t - 1] - 2spins[i,j]
+            E[t] = E[t - 1] + ΔE
             spins[i,j] = -spins[i,j]
         else
-            m[t] = m[t - 1]
+            M[t] = M[t - 1]
             E[t] = E[t - 1]
         end
         if save_interval !== nothing && t % save_interval == 0
@@ -45,5 +44,5 @@ function metropolis!(
         end
     end
 
-    return spins_t, m, E
+    return spins_t, M, E
 end

@@ -26,10 +26,10 @@ function wolff!(
     steps::Integer = 1; # number of iterations
     save_interval::Int = 1
 )
-    m = zeros(steps)
-    E = zeros(steps)
-    m[1] = mean(spins)
-    E[1] = energy(spins) / length(spins)
+    M = zeros(Int, steps)
+    E = zeros(Int, steps)
+    M[1] = sum(spins)
+    E[1] = energy(spins)
     spins_t = [copy(spins)]
 
     Padd = wolff_padd(β)
@@ -38,20 +38,20 @@ function wolff!(
         cluster = wolff_cluster(spins, i, j, Padd)
 
         # change in magnetization
-        Δm = 2spins[i,j] * mean(cluster)
-        m[t] = m[t - 1] - Δm
+        ΔM = 2spins[i,j] * sum(cluster)
+        M[t] = M[t - 1] - ΔM
 
         # flip cluster
         spins .= (1 .- 2cluster) .* spins
 
         # compute new energy
-        E[t] = energy(spins) / length(spins)
+        E[t] = energy(spins)
 
         if save_interval !== nothing && t % save_interval == 0
             push!(spins_t, copy(spins))
         end
     end
-    return spins_t, m, E
+    return spins_t, M, E
 end
 
 wolff_padd(β::Real) = -expm1(-2β)
