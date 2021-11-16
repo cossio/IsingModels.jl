@@ -49,3 +49,13 @@ end
         @test Ising.neighbor_sum(spins, i, j) ∈ -4:2:4
     end
 end
+
+@testset "distance tensor" begin
+    L = 10
+    d = Ising.distance_tensor(L)
+    for i1 = 1:L, j1 = 1:L, i2 = 1:L, j2 = 1:L
+        di = min(abs(i1 - i2), abs(i1 - i2 - L), abs(i1 - i2 + L))
+        dj = min(abs(j1 - j2), abs(j1 - j2 - L), abs(j1 - j2 + L))
+        @test d[i1,j1,i2,j2] ≈ sqrt(di^2 + dj^2)
+    end
+end
