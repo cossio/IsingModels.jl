@@ -24,4 +24,5 @@ SquareIsingModel.onsager_magnetization
 ```@docs
 SquareIsingModel.metropolis!
 SquareIsingModel.wolff!
+SquareIsingModel.hybrid!
 ```
