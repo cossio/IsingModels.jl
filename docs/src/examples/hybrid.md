@@ -79,29 +79,21 @@ using Statistics, CairoMakie, Random, ProgressMeter
 import SquareIsingModel as Ising
 
 Random.seed!(1) # make reproducible
+Ts = 1.5:0.1:5
+βs = inv.(Ts)
+spins = Ising.random_configuration(L)
 
-βs = 0:0.025:1
 fig = Figure(resolution=(600,400))
-ax = Axis(fig[1,1], xlabel="β", ylabel="χ")
-
-χ = zeros(length(βs))
-spins = Ising.random_configuration(30)
-@showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.hybrid!(spins, β, 10^7)
-    M = sum(spins_t; dims=(1,2))
-    χ[k] = β/length(spins) * (mean(M.^2) - mean(abs.(M))^2)
+ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="χ")
+@showprogress for (L, c) in zip([32, 64], [:blue, :red])
+    χ = zeros(length(βs))
+    for (k,β) in enumerate(βs)
+        spins_t, m, E = Ising.hybrid!(spins, β, 10^7)
+        M = sum(spins_t; dims=(1,2))
+        χ[k] = β/length(spins) * (mean(M.^2) - mean(abs.(M))^2)
+    end
+    lines!(ax, Ts, χ, color=c, markersize=5, label="L=$L")
 end
-lines!(ax, βs, χ, color=:blue, markersize=5, label="L=30")
-
-χ = zeros(length(βs))
-spins = Ising.random_configuration(70)
-@showprogress for (k,β) in enumerate(βs)
-    spins_t, m, E = Ising.hybrid!(spins, β, 10^7)
-    M = sum(spins_t; dims=(1,2))
-    χ[k] = β/length(spins) * (mean(M.^2) - mean(abs.(M))^2)
-end
-lines!(ax, βs, χ, color=:red, markersize=5, label="L=70")
-
 axislegend(ax, position=:rt)
 fig
 ```
