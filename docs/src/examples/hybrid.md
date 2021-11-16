@@ -75,25 +75,26 @@ It can be seen that the next row has suffered a larger change, since a cluster w
 ## Magnetic susceptibility
 
 ```@example
-using Statistics, CairoMakie, Random, ProgressMeter
+using Statistics, CairoMakie, Random
 import SquareIsingModel as Ising
 
 Random.seed!(1) # make reproducible
-Ts = 1.5:0.1:5
+Ts = 1.5:0.05:3.5
 βs = inv.(Ts)
 
 fig = Figure(resolution=(600,400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="χ")
-@showprogress for (L, c) in zip([32, 64], [:blue, :red])
-    spins = Ising.random_configuration(L)
+for (L, c) in zip([32, 64], [:blue, :red])
     χ = zeros(length(βs))
+    spins = Ising.random_configuration(L)
     for (k,β) in enumerate(βs)
-        spins_t, m, E = Ising.hybrid!(spins, β, 5 * 10^6)
+        spins_t, m, E = Ising.hybrid!(spins, β, 10^7)
         M = sum(spins_t; dims=(1,2))
         χ[k] = β/length(spins) * (mean(M.^2) - mean(abs.(M))^2)
     end
-    lines!(ax, Ts, χ, color=c, markersize=5, label="L=$L")
+    lines!(ax, Ts, χ, color=c, markersize=5, label=L"L=%$L")
 end
+vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
 axislegend(ax, position=:rt)
 fig
 ```
