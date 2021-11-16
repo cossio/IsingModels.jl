@@ -61,3 +61,19 @@ end
 Generate a random spin configuration.
 """
 random_configuration(L::Int, K::Int = L) = rand((Int8(1), Int8(-1)), L, K)
+
+"""
+    distance_tensor(L, K = L)
+
+Returns a `LxKxLxK` tensor `dist`, such that the entry
+`dist[i1,j1,i2,j2]` gives the distance between sites
+`(i1,j1)` and `(i2,j2)` in the lattice.
+"""
+function distance_tensor(L::Int, K::Int = L)
+    d1 = (reshape(1:L, L, 1) .- reshape(1:L, 1, L))
+    d2 = (reshape(1:K, K, 1) .- reshape(1:K, 1, K))
+    @. d1 = min(d1^2, (d1 - L)^2, (d1 + L)^2)
+    @. d2 = min(d2^2, (d2 - K)^2, (d2 + K)^2)
+    D = reshape(d1,L,1,L,1) .+ reshape(d2,1,K,1,K)
+    return sqrt.(D)
+end
