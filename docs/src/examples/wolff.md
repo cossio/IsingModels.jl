@@ -116,3 +116,44 @@ errorbars!(ax, Ts, clavg, clstd/2, color=:red, whiskerwidth=5)
 axislegend(ax, position=:rt)
 fig
 ```
+
+
+## Wolff explores configurations efficiently at the critical temperature
+
+The following example shows how at the critical temperature, the Metropolis sampler gets stuck in particular cluster structures.
+In contrast the Wolff algorihm explores diverse states.
+
+
+```@example
+using Statistics, CairoMakie, Random
+import SquareIsingModel as Ising
+
+L = 100
+N = L^2
+spins = Ising.random_configuration(100)
+spins .= 1
+spins_t_metro, M_metro, E_metro = Ising.metropolis!(spins, Ising.βc, 10^6);
+spins .= 1
+spins_t_wolff, M_wolff, E_wolff = Ising.wolff!(spins, Ising.βc, 10^4);
+
+fig = Figure(resolution=(1000, 650))
+for (col, t) in enumerate(1:20:100)
+    ax = Axis(fig[1,col], title="t=$t, metropolis")
+    heatmap!(ax, spins_t_metro[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+end
+for (col, t) in enumerate(1:2000:10000)
+    ax = Axis(fig[2,col], title="t=$t, wolff")
+    heatmap!(ax, spins_t_wolff[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+end
+
+ax = Axis(fig[3,1:2], title="magnetization")
+lines!(ax, M_wolff[1:10:end] / N, label="wolff")
+lines!(ax, M_metro[1:1000:end] / N, label="metropolis", linewidth=2, color=:red)
+ylims!(ax, (-1,1))
+ax = Axis(fig[3,3:4], title="energy")
+lines!(ax, E_wolff[1:10:end] / N, label="wolff")
+lines!(ax, E_metro[1:1000:end] / N, label="metropolis", linewidth=2, color=:red)
+axislegend(ax, position = :rb)
+
+fig
+```
