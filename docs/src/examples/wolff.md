@@ -128,7 +128,7 @@ In contrast the Wolff algorihm explores diverse states.
 using Statistics, CairoMakie, Random
 import SquareIsingModel as Ising
 
-Random.seed!(1) # reproducibility
+Random.seed!(3) # reproducibility
 
 L = 100
 N = L^2
