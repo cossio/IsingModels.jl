@@ -142,10 +142,12 @@ fig = Figure(resolution=(1000, 650))
 for (col, t) in enumerate(1:20:100)
     ax = Axis(fig[1,col], title="t=$t, metropolis")
     heatmap!(ax, spins_t_metro[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+    hidedecorations!(ax)
 end
 for (col, t) in enumerate(1:2000:10000)
     ax = Axis(fig[2,col], title="t=$t, wolff")
     heatmap!(ax, spins_t_wolff[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+    hidedecorations!(ax)
 end
 
 ax = Axis(fig[3,1:2], title="magnetization")
