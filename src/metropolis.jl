@@ -47,11 +47,11 @@ function metropolis_step!(spins; t, M, E, _Exp2β)
         M[t] = M[t - 1] - 2spins[i,j]
         E[t] = E[t - 1] + 2S
         spins[i,j] = -spins[i,j]
-        return true
+        return S < 0 ? one(eltype(_Exp2β)) : _Exp2β[S + 1]
     else
         M[t] = M[t - 1]
         E[t] = E[t - 1]
-        return false
+        return zero(eltype(_Exp2β))
     end
 end
 

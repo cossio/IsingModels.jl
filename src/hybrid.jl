@@ -43,6 +43,14 @@ function hybrid!(
     return spins_t, M, E
 end
 
+mutable struct HybridStats
+    local_flip::Float64
+    wolff_flip::Float64
+    local_time::Float64
+    wolff_time::Float64
+end
+HybridStats() = HybridStats(0, 0, 0, 0)
+
 """
     dynamic_hybrid!(spins, β, steps; save_interval)
 
@@ -51,7 +59,8 @@ Same as `hybrid!`, but adjusts numbers of Metropolis and Wolff steps dynamically
 function dynamic_hybrid!(
     spins::AbstractMatrix{Int8},
     β::Real, steps::Int = 1;
-    save_interval::Int = length(spins)
+    save_interval::Int = length(spins),
+    hybrid_stats::HybridStats = HybridStats()
 )
     @assert steps ≥ 1
     @assert save_interval ≥ 1
@@ -70,7 +79,7 @@ function dynamic_hybrid!(
     _Exp2β = metropolis_acceptance_probabilities(β)
     Padd = wolff_padd(β)
 
-    wolff_flip = local_flip = zero(Int128)
+    wolff_flip = local_flip = 0.0
     wolff_time = local_time = 0.0
 
     for t ∈ 2:steps
@@ -88,24 +97,17 @@ function dynamic_hybrid!(
         end
     end
 
-    println("β = ", β)
-    println(
-        "local rate: ", local_flip / local_time,
-        "; local flips: ", local_flip,
-        "; local time: ", local_time
-    )
-    println(
-        "wolff rate: ", wolff_flip / wolff_time,
-        "; wolff flips: ", wolff_flip,
-        "; wolff time: ", wolff_time
-    )
+    hybrid_stats.local_flip = local_flip
+    hybrid_stats.wolff_flip = wolff_flip
+    hybrid_stats.local_time = local_time
+    hybrid_stats.wolff_time = wolff_time
 
     return spins_t, M, E
 end
 
 function hybrid_decide(
-    wolff_flip::Integer,
-    local_flip::Integer,
+    wolff_flip::Real,
+    local_flip::Real,
     wolff_time::Real,
     local_time::Real,
     N::Integer
