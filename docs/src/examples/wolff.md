@@ -161,3 +161,34 @@ axislegend(ax, position = :rb)
 
 fig
 ```
+
+
+## Binder's parameter
+
+As the system size grows, the crossing point of the different curves is the critical temperature.
+
+```@example
+using Statistics, CairoMakie, Random
+import SquareIsingModel as Ising
+
+Random.seed!(1) # make reproducible
+Ts = 2.2:0.01:2.3
+βs = inv.(Ts)
+
+fig = Figure(resolution=(600, 400))
+ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="Binder parameter")
+@time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
+    U = zeros(length(βs))
+    spins = Ising.random_configuration(L)
+    for (k, β) in enumerate(βs)
+        spins_t, M, E = Ising.wolff!(spins, β, 10^5)
+        U[k] = (3 - mean(M.^4) / mean(M.^2)^2) / 2
+    end
+    scatter!(ax, Ts, U, color=color, markersize=5, label=L"L=%$L")
+    lines!(ax, Ts, U, color=color, markersize=5)
+end
+vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
+axislegend(ax, position=:lb) 
+
+fig
+```
