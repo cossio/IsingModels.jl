@@ -75,3 +75,13 @@ end
     s = Ising.random_configuration(L, K)
     @test 2Ising.energy(s) ≈ -sum(s[i,j] * Ising.neighbor_sum(s,i,j) for i in 1:L, j in 1:K)
 end
+
+@testset "Kramers-Wannier duality" begin
+    @test Ising.kramers_wannier(Ising.βc) ≈ Ising.βc
+    @test isinf(Ising.kramers_wannier(0))
+    @test iszero(Ising.kramers_wannier(Inf))
+    for β in 0.1:0.1:1
+        β_ = Ising.kramers_wannier(β)
+        @test sinh(2β_) * sinh(2β) ≈ 1
+    end
+end

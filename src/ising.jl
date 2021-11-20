@@ -77,3 +77,10 @@ function distance_tensor(L::Int, K::Int = L)
     D = reshape(d1,L,1,L,1) .+ reshape(d2,1,K,1,K)
     return sqrt.(D)
 end
+
+"""
+    kramers_wannier(β)
+
+Returns the Kramers-Wannier dual inverse-temperature of β.
+"""
+kramers_wannier(β::Real) = -log(tanh(β)) / 2
