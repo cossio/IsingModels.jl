@@ -46,9 +46,10 @@ end
 function wolff_step!(spins; t, M, E, Padd)
     i, j = rand.(Base.OneTo.(size(spins)))
     cluster = wolff_cluster(spins, i, j, Padd)
+    cluster_size = sum(cluster)
 
     # change in magnetization
-    ΔM = 2spins[i,j] * sum(cluster)
+    ΔM = 2spins[i,j] * cluster_size
     M[t] = M[t - 1] - ΔM
 
     # flip cluster
@@ -57,7 +58,7 @@ function wolff_step!(spins; t, M, E, Padd)
     # compute new energy
     E[t] = energy(spins)
 
-    return nothing
+    return cluster_size
 end
 
 wolff_padd(β::Real) = -expm1(-2β)

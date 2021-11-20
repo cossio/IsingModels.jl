@@ -47,11 +47,12 @@ function metropolis_step!(spins; t, M, E, _Exp2β)
         M[t] = M[t - 1] - 2spins[i,j]
         E[t] = E[t - 1] + 2S
         spins[i,j] = -spins[i,j]
+        return true
     else
         M[t] = M[t - 1]
         E[t] = E[t - 1]
+        return false
     end
-    return nothing
 end
 
 metropolis_acceptance_probabilities(β::Real) = ntuple(x -> exp(-2β * (x - 1)), 5)
