@@ -76,15 +76,7 @@ function dynamic_hybrid!(
     for t ∈ 2:steps
         wolff_rate = wolff_flip / wolff_time
         local_rate = local_flip / local_time
-        if wolff_rate < local_rate
-            wolff_time += @elapsed begin
-                wolff_flip += wolff_step!(spins; t = t, M = M, E = E, Padd = Padd)
-            end
-        elseif local_rate < wolff_rate
-            local_time += @elapsed begin
-                local_flip += metropolis_step!(spins; t = t, M = M, E = E, _Exp2β = _Exp2β)
-            end
-        elseif rand(Bool)
+        if iszero(wolff_flip) || wolff_rate > local_rate
             wolff_time += @elapsed begin
                 wolff_flip += wolff_step!(spins; t = t, M = M, E = E, Padd = Padd)
             end
@@ -98,8 +90,8 @@ function dynamic_hybrid!(
         end
     end
 
-    println("local rate: ", local_flip / local_time)
-    println("wolff rate: ", wolff_flip / wolff_time)
+    println("local rate: ", local_flip / local_time, "; local flips: ", local_flip, "; local time: ", local_time)
+    println("wolff rate: ", wolff_flip / wolff_time, "; wolff flips: ", wolff_flip, "; wolff time: ", wolff_time)
 
     return spins_t, M, E
 end
