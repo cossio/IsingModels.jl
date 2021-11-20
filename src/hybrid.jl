@@ -74,9 +74,7 @@ function dynamic_hybrid!(
     wolff_time = local_time = 0.0
 
     for t ∈ 2:steps
-        wolff_rate = wolff_flip / wolff_time
-        local_rate = local_flip / local_time
-        if iszero(wolff_flip) || wolff_rate > local_rate
+        if hybrid_decide(wolff_flip, local_flip, wolff_time, local_time, length(spins))
             wolff_time += @elapsed begin
                 wolff_flip += wolff_step!(spins; t = t, M = M, E = E, Padd = Padd)
             end
@@ -103,4 +101,32 @@ function dynamic_hybrid!(
     )
 
     return spins_t, M, E
+end
+
+function hybrid_decide(
+    wolff_flip::Integer,
+    local_flip::Integer,
+    wolff_time::Real,
+    local_time::Real,
+    N::Integer
+)
+    # return true -> do Wolff, else do Metropolis
+    DO_WOLFF = true
+    DO_LOCAL = false
+
+    if iszero(wolff_time) || iszero(wolff_flip) || wolff_flip * N < local_flip
+        return DO_WOLFF
+    elseif iszero(local_time) || iszero(local_flip) || local_flip * N < wolff_flip
+        return DO_LOCAL
+    end
+
+    wolff_rate = wolff_flip / wolff_time
+    local_rate = local_flip / local_time
+
+    Pwolff = wolff_rate / (wolff_rate + local_rate)
+    if rand() < Pwolff
+        return DO_WOLFF
+    else
+        return DO_LOCAL
+    end
 end
