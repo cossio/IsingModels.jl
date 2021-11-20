@@ -90,8 +90,17 @@ function dynamic_hybrid!(
         end
     end
 
-    println("local rate: ", local_flip / local_time, "; local flips: ", local_flip, "; local time: ", local_time)
-    println("wolff rate: ", wolff_flip / wolff_time, "; wolff flips: ", wolff_flip, "; wolff time: ", wolff_time)
+    println("β = ", β)
+    println(
+        "local rate: ", local_flip / local_time,
+        "; local flips: ", local_flip,
+        "; local time: ", local_time
+    )
+    println(
+        "wolff rate: ", wolff_flip / wolff_time,
+        "; wolff flips: ", wolff_flip,
+        "; wolff time: ", wolff_time
+    )
 
     return spins_t, M, E
 end
