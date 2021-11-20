@@ -58,4 +58,20 @@ end
         dj = min(abs(j1 - j2), abs(j1 - j2 - L), abs(j1 - j2 + L))
         @test d[i1,j1,i2,j2]^2 ≈ di^2 + dj^2
     end
+
+    L = 11
+    K = 7
+    d = Ising.distance_tensor(L, K)
+    for i1 in 1:L, j1 in 1:K, i2 in 1:L, j2 in 1:K
+        di = min(abs(i1 - i2), abs(i1 - i2 - L), abs(i1 - i2 + L))
+        dj = min(abs(j1 - j2), abs(j1 - j2 - K), abs(j1 - j2 + K))
+        @test d[i1, j1, i2, j2]^2 ≈ di^2 + dj^2
+    end
+end
+
+@testset "energy" begin
+    L = 10
+    K = 15
+    s = Ising.random_configuration(L, K)
+    @test 2Ising.energy(s) ≈ -sum(s[i,j] * Ising.neighbor_sum(s,i,j) for i in 1:L, j in 1:K)
 end
