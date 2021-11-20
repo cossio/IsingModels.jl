@@ -82,19 +82,19 @@ Random.seed!(1) # make reproducible
 Ts = 2:0.01:3
 βs = inv.(Ts)
 
-fig = Figure(resolution=(600,400))
-ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="χ")
-for (L, c) in zip([32, 64], [:blue, :red])
+fig = Figure(resolution=(600, 400))
+ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="susceptibility", yscale=log10)
+@time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
     χ = zeros(length(βs))
-    spins = Ising.random_configuration(L)
-    for (k,β) in enumerate(βs)
-        spins_t, m, E = Ising.hybrid!(spins, β, 10^7)
-        M = sum(spins_t; dims=(1,2))
-        χ[k] = β/length(spins) * (mean(M.^2) - mean(abs.(M))^2)
+    for (k, β) in enumerate(βs)
+        spins = Ising.random_configuration(L)
+        spins_t, M, E = Ising.hybrid!(spins, β, 10^6)
+        χ[k] = β/length(spins) * var(abs.(M))
     end
-    lines!(ax, Ts, χ, color=c, markersize=5, label=L"L=%$L")
+    scatter!(ax, Ts, χ, color=color, markersize=5, label=L"L=%$L")
 end
 vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
 axislegend(ax, position=:rt)
+
 fig
 ```
