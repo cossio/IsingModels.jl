@@ -67,6 +67,12 @@ end
         dj = min(abs(j1 - j2), abs(j1 - j2 - K), abs(j1 - j2 + K))
         @test d[i1, j1, i2, j2]^2 ≈ di^2 + dj^2
     end
+
+    dt = Ising.distance_tensor(L, K)
+    dm = Ising.distance_matrix(L, K)
+    for i in 1:L, j in 1:K
+        @test dt[i, j, mod1.(i:(i + L - 1), L), mod1.(j:(j + K - 1), K)] == dm
+    end
 end
 
 @testset "energy" begin

@@ -79,6 +79,22 @@ function distance_tensor(L::Int, K::Int = L)
 end
 
 """
+    distance_matrix(L, K = L)
+
+Returns a `LxK` matrix `dist`, such that the entry
+`dist[i,j]` gives the distance between sites
+`(0,0)` and `(i,j)` in the lattice.
+"""
+function distance_matrix(L::Int, K::Int = L)
+    x = 0:(L - 1)
+    y = 0:(K - 1)
+    dx = @. min(x^2, (x - L)^2, (x + L)^2)
+    dy = @. min(y^2, (y - K)^2, (y + K)^2)
+    d = reshape(dx, L, 1) .+ reshape(dy, 1, K)
+    return sqrt.(d)
+end
+
+"""
     kramers_wannier(β)
 
 Returns the Kramers-Wannier dual inverse-temperature of β.
