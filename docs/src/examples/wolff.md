@@ -222,3 +222,36 @@ Legend(fig[1,2], ax)
 
 fig
 ```
+
+
+## Internal energy vs. exact expression
+
+```@example
+using Statistics, CairoMakie, Random
+import SquareIsingModel as Ising
+
+Random.seed!(1) # make reproducible
+Ts = 1.8:0.05:3
+βs = inv.(Ts)
+
+fig = Figure(resolution=(800, 400))
+ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="internal energy")
+
+@time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
+    Eavg = zeros(length(βs))
+    Estd = zeros(length(βs))
+    for (k, β) in enumerate(βs)
+        spins = Ising.random_configuration(L)
+        spins_t, M, E = Ising.wolff!(spins, β, 10^5)
+        Eavg[k] = mean(E / length(spins))
+        Estd[k] = std(E / length(spins))
+    end
+    scatter!(ax, Ts, Eavg, color=color, markersize=5, label=L"L=%$L")
+    errorbars!(ax, Ts, Eavg, Estd/2, color=color, whiskerwidth=5)
+end
+lines!(ax, Ts, Ising.onsager_internal_energy.(βs), color=:black, label="exact")
+vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
+Legend(fig[1,2], ax)
+
+fig
+```
