@@ -84,6 +84,7 @@ end
 Returns a `LxK` matrix `dist`, such that the entry
 `dist[i,j]` gives the distance between sites
 `(0,0)` and `(i,j)` in the lattice.
+Takes into account the periodicity of the lattice.
 """
 function distance_matrix(L::Int, K::Int = L)
     x = 0:(L - 1)
