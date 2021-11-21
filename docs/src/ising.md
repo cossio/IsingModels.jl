@@ -31,3 +31,11 @@ In this package, the system is simulated using the Metropolis algorithm or the W
 ```
 Newman, Mark EJ, and G. T. Barkema. "Monte Carlo Methods in Statistical Physics (1999)." New York: Oxford 475 (1999).
 ```
+
+Onsager derived exact expressions for the free energy, the heat capacity, and the internal energy in the thermodynamic limit.
+
+```
+Onsager, Lars. "Crystal statistics. I. A two-dimensional model with an order-disorder transition." Physical Review 65.3-4 (1944): 117.
+```
+
+See [`onsager_internal_energy`](@ref Ising.onsager_internal_energy) and [`onsager_heat_capacity`](@ref Ising.onsager_heat_capacity), implemented in this package.
