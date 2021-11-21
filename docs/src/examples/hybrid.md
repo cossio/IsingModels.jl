@@ -139,7 +139,7 @@ using Statistics, CairoMakie, Random
 import SquareIsingModel as Ising
 
 Random.seed!(1) # make reproducible
-Ts = 1:0.5:4
+Ts = 1:0.5:5
 βs = inv.(Ts)
 
 fig = Figure(resolution=(600, 400))
