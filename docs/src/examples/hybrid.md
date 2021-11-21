@@ -126,3 +126,40 @@ axislegend(ax, position=:lt)
 
 fig
 ```
+
+
+## Wolff vs. Metropolis spin flip rates
+
+At low temperatures, Wolff flips more spins per unit time than Metropolis.
+At high temperatures, Metropolis is more efficient.
+The crossing point approaches the critical temperature for larger system sizes.
+
+```@example
+using Statistics, CairoMakie, Random
+import SquareIsingModel as Ising
+
+Random.seed!(1) # make reproducible
+Ts = 1:0.5:4
+βs = inv.(Ts)
+
+fig = Figure(resolution=(600, 400))
+ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="spin flips / second", yscale=log10)
+@time for (L, color) in zip([4, 8, 16, 32], [:blue, :red, :orange, :green])
+    wolff_rates = zeros(length(βs))
+    local_rates = zeros(length(βs))
+    for (k, β) in enumerate(βs)
+        spins = Ising.random_configuration(L)
+        stats = Ising.HybridStats()
+        spins_t, M, E = Ising.dynamic_hybrid!(spins, β, 10^6; hybrid_stats=stats)
+        local_rates[k] = stats.local_flip / stats.local_time
+        wolff_rates[k] = stats.wolff_flip / stats.wolff_time
+    end
+    scatterlines!(ax, Ts, local_rates, markersize=15, label=L"$L=%$L$ local", color=color, marker='x', markercolor=color, linestyle=:dash)
+    scatterlines!(ax, Ts, wolff_rates, markersize=15, label=L"$L=%$L$ wolff", color=color, marker='o', markercolor=color, linestyle=:dot)
+end
+vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linewidth=1)
+
+Legend(fig[1,2], ax)
+
+fig
+```
