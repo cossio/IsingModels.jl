@@ -192,3 +192,33 @@ axislegend(ax, position=:lb)
 
 fig
 ```
+
+
+## Heat capacity vs. exact expression
+
+```@example
+using Statistics, CairoMakie, Random
+import SquareIsingModel as Ising
+
+Random.seed!(1) # make reproducible
+Ts = 1.8:0.01:3
+βs = inv.(Ts)
+
+fig = Figure(resolution=(800, 400))
+ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="heat capacity", limits=(extrema(Ts)..., 0,2))
+
+@time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
+    C = zeros(length(βs))
+    for (k, β) in enumerate(βs)
+        spins = Ising.random_configuration(L)
+        spins_t, M, E = Ising.wolff!(spins, β, 10^5)
+        C[k] = β^2/length(spins) * var(E)
+    end
+    scatter!(ax, Ts, C, color=color, markersize=5, label=L"L=%$L")
+end
+lines!(ax, Ts, Ising.onsager_heat_capacity.(βs), color=:black, label="exact")
+vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
+Legend(fig[1,2], ax)
+
+fig
+```
