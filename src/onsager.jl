@@ -41,7 +41,7 @@ function onsager_heat_capacity(β::Real)
     K = ellipk(k^2)
     E = ellipe(k^2)
     j = 2tanh(2β)^2 - 1
-    β^2 * coth(2β)^2 * 2/π * (2K - 2E - (1 - j) * (π/2 + j * K))
+    β^2 * coth(2β)^2 * (2/π) * (2K - 2E - (1 - j) * (π/2 + j * K))
 end
 
 """
