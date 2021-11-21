@@ -25,7 +25,9 @@ Onsager in the thermodynamic limit.
 """
 function onsager_internal_energy(β::Real)
     k = 2sinh(2β) / cosh(2β)^2
-    return -2coth(2β) * (1 + 2/π * (2tanh(2β)^2 - 1) * ellipk(k^2))
+    j = 2tanh(2β)^2 - 1
+    K = ellipk(k^2)
+    return -coth(2β) * (1 + 2/π * j * K)
 end
 
 """
@@ -36,8 +38,10 @@ Onsager in the thermodynamic limit.
 """
 function onsager_heat_capacity(β::Real)
     k = 2sinh(2β) / cosh(2β)^2
-    k_ = 2tanh(2β)^2 - 1
-    β * coth(2β)^2 * 2/π * (2ellipk(k^2) - 2ellipe(k^2) - (1 - k_) * (π/2 + k_ * ellipk(k^2)))
+    K = ellipk(k^2)
+    E = ellipe(k^2)
+    j = 2tanh(2β)^2 - 1
+    β^2 * coth(2β)^2 * 2/π * (2K - 2E - (1 - j) * (π/2 + j * K))
 end
 
 """

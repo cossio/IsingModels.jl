@@ -18,3 +18,10 @@ end
         @test sinh(2β_) * sinh(2β) ≈ 1
     end
 end
+
+@testset "Onsager heat capacity and energy thermodynamic relations" begin
+    u(T) = Ising.onsager_internal_energy(1/T)
+    for T in 0.5:0.5:5
+        @test u'(T) ≈ Ising.onsager_heat_capacity(1/T) rtol=0.0001
+    end
+end
