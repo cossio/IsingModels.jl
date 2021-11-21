@@ -94,10 +94,3 @@ function distance_matrix(L::Int, K::Int = L)
     d = reshape(dx, L, 1) .+ reshape(dy, 1, K)
     return sqrt.(d)
 end
-
-"""
-    kramers_wannier(β)
-
-Returns the Kramers-Wannier dual inverse-temperature of β.
-"""
-kramers_wannier(β::Real) = -log(tanh(β)) / 2

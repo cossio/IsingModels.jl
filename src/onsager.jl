@@ -39,3 +39,10 @@ function onsager_heat_capacity(β::Real)
     k_ = 2tanh(2β)^2 - 1
     β * coth(2β)^2 * 2/π * (2ellipk(k^2) - 2ellipe(k^2) - (1 - k_) * (π/2 + k_ * ellipk(k^2)))
 end
+
+"""
+    kramers_wannier(β)
+
+Returns the Kramers-Wannier dual inverse-temperature of β.
+"""
+kramers_wannier(β::Real) = -log(tanh(β)) / 2
