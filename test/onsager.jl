@@ -25,3 +25,11 @@ end
         @test u'(T) ≈ Ising.onsager_heat_capacity(1/T) rtol=0.0001
     end
 end
+
+@testset "Kramers-Wannier duality of heat capacity and internal energy" begin
+    for β in 0.1:0.1:1
+        Ehere = Ising.onsager_internal_energy(β)
+        Edual = Ising.onsager_internal_energy(Ising.kramers_wannier(β))
+        @test Edual ≈ -2cosh(2β) - sinh(2β) * Ehere
+    end
+end
