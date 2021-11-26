@@ -18,7 +18,7 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(30)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    spins_t, M, E = Ising.wolff!(spins, β, steps=10^3)
     m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
     mavg[k] = mean(m)
     mstd[k] = std(m)
@@ -30,7 +30,7 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(70)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    spins_t, M, E = Ising.wolff!(spins, β, steps=10^3)
     m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
     mavg[k] = mean(m)
     mstd[k] = std(m)
@@ -53,8 +53,8 @@ Random.seed!(62) # reproducibility
 
 β = Ising.βc
 spins = Ising.random_configuration(400)
-Ising.metropolis!(spins, β, 10^7)
-Ising.wolff!(spins, β, 200)
+Ising.metropolis!(spins, β; steps=10^7)
+Ising.wolff!(spins, β, steps=200)
 
 cluster = Ising.wolff_cluster(spins, 200, 200, Ising.wolff_padd(β))
 
@@ -91,7 +91,7 @@ clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 spins = Ising.random_configuration(30)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    spins_t, M, E = Ising.wolff!(spins, β, steps=10^3)
     cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(spins))
     clstd[k] = std(cluster_size / length(spins))
@@ -104,7 +104,7 @@ clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 spins = Ising.random_configuration(70)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.wolff!(spins, β, 10^3)
+    spins_t, M, E = Ising.wolff!(spins, β, steps=10^3)
     cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(spins))
     clstd[k] = std(cluster_size / length(spins))
@@ -134,9 +134,9 @@ L = 100
 N = L^2
 spins = Ising.random_configuration(100)
 spins .= 1
-spins_t_metro, M_metro, E_metro = Ising.metropolis!(spins, Ising.βc, 10^6);
+spins_t_metro, M_metro, E_metro = Ising.metropolis!(spins, Ising.βc; steps=10^6);
 spins .= 1
-spins_t_wolff, M_wolff, E_wolff = Ising.wolff!(spins, Ising.βc, 10^4);
+spins_t_wolff, M_wolff, E_wolff = Ising.wolff!(spins, Ising.βc, steps=10^4);
 
 fig = Figure(resolution=(1000, 650))
 for (col, t) in enumerate(1:20:100)
@@ -181,7 +181,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="Binder param
     U = zeros(length(βs))
     spins = Ising.random_configuration(L)
     for (k, β) in enumerate(βs)
-        spins_t, M, E = Ising.wolff!(spins, β, 10^5)
+        spins_t, M, E = Ising.wolff!(spins, β, steps=10^5)
         U[k] = (3 - mean(M.^4) / mean(M.^2)^2) / 2
     end
     scatter!(ax, Ts, U, color=color, markersize=5, label=L"L=%$L")
@@ -211,7 +211,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="heat capacit
     C = zeros(length(βs))
     for (k, β) in enumerate(βs)
         spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.wolff!(spins, β, 10^5)
+        spins_t, M, E = Ising.wolff!(spins, β, steps=10^5)
         C[k] = β^2/length(spins) * var(E)
     end
     scatter!(ax, Ts, C, color=color, markersize=5, label=L"L=%$L")
@@ -242,7 +242,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="internal ene
     Estd = zeros(length(βs))
     for (k, β) in enumerate(βs)
         spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.wolff!(spins, β, 10^5)
+        spins_t, M, E = Ising.wolff!(spins, β, steps=10^5)
         Eavg[k] = mean(E / length(spins))
         Estd[k] = std(E / length(spins))
     end

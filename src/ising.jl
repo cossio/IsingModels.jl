@@ -13,18 +13,20 @@ function adjacency_matrix(L::Int, K::Int = L)
 end
 
 """
-    energy(spins)
+    energy(spins, h = 0)
 
 Computes the energy of `spins` in the Ising 2-dimensional model.
 """
 function energy(spins::AbstractMatrix{Int8})
-    N, M = size(spins)
+    L, K = size(spins)
     E = 0
-    for i = 1:N, j = 1:M
-        E -= spins[i,j] * (spins[mod1(i + 1, N), j] + spins[i, mod1(j + 1, M)])
+    for i = 1:L, j = 1:K
+        E -= spins[i,j] * (spins[mod1(i + 1, L), j] + spins[i, mod1(j + 1, K)])
     end
     return E
 end
+
+energy(spins::AbstractMatrix{Int8}, h::Real) = energy(spins) - h * sum(spins)
 
 """
     neighbor_sum(spins, i, j)
@@ -32,22 +34,39 @@ end
 Sum of spins in neighbor sites of (i, j).
 """
 function neighbor_sum(spins::AbstractMatrix{Int8}, i::Int, j::Int)
-    S = 0
-    for d in (-1, 1)
-        S += spins[mod1(i + d, size(spins, 1)), j]
-        S += spins[i, mod1(j + d, size(spins, 2))]
-    end
-    return S
+    L, K = size(spins)
+    @assert (1 ≤ i ≤ L) && (1 ≤ j ≤ K)
+    top = spins[mod1(i + 1, L), j]
+    bot = spins[mod1(i - 1, L), j]
+    lef = spins[i, mod1(j + 1, K)]
+    rig = spins[i, mod1(j - 1, K)]
+    return top + bot + lef + rig
 end
 
 """
-    neighbors(i, j, L, K = L)
+    neighbor_sum_div_2(spins, i, j)
+
+neighbor_sum(spins, i, j) is always even. Therefore here we compute the sum, divided by 2.
+"""
+function neighbor_sum_div_2(spins::AbstractMatrix{Int8}, i::Int, j::Int)
+    L, K = size(spins)
+    @assert (1 ≤ i ≤ L) && (1 ≤ j ≤ K)
+    top = spins[mod1(i + 1, L), j] > 0
+    bot = spins[mod1(i - 1, L), j] > 0
+    lef = spins[i, mod1(j + 1, K)] > 0
+    rig = spins[i, mod1(j - 1, K)] > 0
+    return top + bot + lef + rig - 2
+end
+
+"""
+    neighbors(L, K [= L], i, j)
+    neighbors(spins, i, j)
 
 Returns the list of neighbors of site `(i,j)` in the 2-dimensional lattice grid with sides
 `L x K`. That is, the sites `((i+1,j), (i-1,j), (i,j+1), (i,j-1))`, but considering the
 periodic bounary conditions at the edges.
 """
-function neighbors(i::Int, j::Int, L::Int, K::Int = L)
+function neighbors(L::Int, K::Int, i::Int, j::Int)
     @assert 1 ≤ i ≤ L && 1 ≤ j ≤ K
     return ((mod1(i + 1, L), j),
             (mod1(i - 1, L), j),
@@ -55,12 +74,37 @@ function neighbors(i::Int, j::Int, L::Int, K::Int = L)
             (i, mod1(j - 1, K)))
 end
 
+neighbors(L::Int, i::Int, j::Int) = neighbors(L, L, i, j)
+neighbors(spins::AbstractMatrix, i::Int, j::Int) = neighbors(size(spins)..., i, j)
+
 """
     random_configuration(L, K = L)
 
 Generate a random spin configuration.
 """
-random_configuration(L::Int, K::Int = L) = rand((Int8(1), Int8(-1)), L, K)
+random_configuration(::Type{Int8}, L::Int, K::Int = L) = rand((Int8(1), Int8(-1)), L, K)
+random_configuration(L::Int, K::Int = L) = random_configuration(Int8, L, K)
+
+"""
+    random_magnetized_configuration(M, L, K = L)
+
+Generate a random spin configuration with magnetization (sum over all spins) equal to `M`.
+"""
+function random_magnetized_configuration(M::Int, L::Int, K::Int = L)
+    N = L * K
+    @assert -N ≤ M ≤ N
+    @assert iseven(N + M) # 2 * number of +1 spins
+    @assert iseven(N - M) # 2 * number of -1 spins
+    Np = (N + M) ÷ 2 # number of +1 spins
+    Nm = (N - M) ÷ 2 # number of +1 spins
+    @assert Np + Nm == N
+    spins = zeros(Int8, L, K)
+    p = randperm(L * K)
+    spins[p[1:Np]] .= +1
+    spins[p[(end - Nm + 1):end]] .= -1
+    @assert all((spins .== 1) .| (spins .== -1))
+    return spins
+end
 
 """
     distance_tensor(L, K = L)
@@ -80,6 +124,7 @@ end
 
 """
     distance_matrix(L, K = L)
+    distance_matrix(spins)
 
 Returns a `LxK` matrix `dist`, such that the entry
 `dist[i,j]` gives the distance between sites
@@ -94,3 +139,4 @@ function distance_matrix(L::Int, K::Int = L)
     d = reshape(dx, L, 1) .+ reshape(dy, 1, K)
     return sqrt.(d)
 end
+distance_matrix(spins::AbstractMatrix) = distance_matrix(size(spins)...)

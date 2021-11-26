@@ -18,7 +18,7 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(30)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.hybrid!(spins, β, 10^7)
+    spins_t, M, E = Ising.hybrid!(spins, β, steps=10^7)
     m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
     mavg[k] = mean(m)
     mstd[k] = std(m)
@@ -30,7 +30,7 @@ mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 spins = Ising.random_configuration(70)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.hybrid!(spins, β, 10^7)
+    spins_t, M, E = Ising.hybrid!(spins, β, steps=10^7)
     m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
     mavg[k] = mean(m)
     mstd[k] = std(m)
@@ -55,8 +55,8 @@ L = 50
 T = 20
 Δ = 5
 spins = Ising.random_configuration(L)
-Ising.metropolis!(spins, β, 10^6) # equilibrate a bit to get clusters
-spins_t, M, E = Ising.hybrid!(spins, β, T; save_interval = 1, local_steps = Δ)
+Ising.metropolis!(spins, β; steps=10^6) # equilibrate a bit to get clusters
+spins_t, M, E = Ising.hybrid!(spins, β; steps=T, save_interval = 1, local_steps = Δ)
 fig = Figure(resolution=(600, 500))
 for t ∈ 1:T
     ax = Axis(fig[cld(t, Δ), mod1(t, Δ)])
@@ -88,7 +88,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="susceptibili
     χ = zeros(length(βs))
     for (k, β) in enumerate(βs)
         spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.hybrid!(spins, β, 10^6)
+        spins_t, M, E = Ising.hybrid!(spins, β, steps=T10^6)
         χ[k] = β/length(spins) * var(abs.(M))
     end
     scatter!(ax, Ts, χ, color=color, markersize=5, label=L"L=%$L")
@@ -116,7 +116,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="heat capacit
     C = zeros(length(βs))
     for (k, β) in enumerate(βs)
         spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.hybrid!(spins, β, 10^7)
+        spins_t, M, E = Ising.hybrid!(spins, β, steps=T10^7)
         C[k] = β^2/length(spins) * var(E)
     end
     scatter!(ax, Ts, C, color=color, markersize=5, label=L"L=%$L")
@@ -150,7 +150,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="spin flips /
     for (k, β) in enumerate(βs)
         spins = Ising.random_configuration(L)
         stats = Ising.HybridStats()
-        spins_t, M, E = Ising.dynamic_hybrid!(spins, β, 10^6; hybrid_stats=stats)
+        spins_t, M, E = Ising.dynamic_hybrid!(spins, β; steps=10^6, hybrid_stats=stats)
         local_rates[k] = stats.local_flip / stats.local_time
         wolff_rates[k] = stats.wolff_flip / stats.wolff_time
     end

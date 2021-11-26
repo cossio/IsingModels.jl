@@ -1,5 +1,17 @@
 include("init.jl")
 
+@testset "bits / spins" begin
+    L = 10
+    K = 15
+    s = Ising.random_configuration(L, K)
+    @test s isa Matrix{Int8}
+    @test 2Ising.energy(s) ≈ -sum(s[i,j] * Ising.neighbor_sum(s,i,j) for i in 1:L, j in 1:K)
+
+    for M = -(L * K):2:(L * K)
+        @test sum(Ising.random_magnetized_configuration(M, L, K)) == M
+    end
+end
+
 @testset "Ising grid lattice" begin
     s = @inferred Ising.random_configuration(50)
     @test Ising.neighbor_sum(s, 5, 5) == s[5,4] + s[5,6] + s[4,5] + s[6,5]
@@ -80,4 +92,6 @@ end
     K = 15
     s = Ising.random_configuration(L, K)
     @test 2Ising.energy(s) ≈ -sum(s[i,j] * Ising.neighbor_sum(s,i,j) for i in 1:L, j in 1:K)
+    h = randn()
+    @test Ising.energy(s, h) ≈ Ising.energy(s) - h * sum(s)
 end

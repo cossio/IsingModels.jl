@@ -1,5 +1,5 @@
 module SquareIsingModel
-    using Statistics, LinearAlgebra
+    using Statistics, LinearAlgebra, Random
     using SpecialFunctions: ellipk, ellipe
 
     include("onsager.jl")
