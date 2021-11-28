@@ -22,11 +22,14 @@ function metropolis!(
     Paccept = metropolis_acceptance_probabilities(β, h)
 
     #= Track history of magnetization and energy =#
-    M = zeros(Int, steps)
-    E = zeros(Int, steps)
+    M0 = sum(spins) # magnetization
+    E0 = energy(spins, h)
 
-    M[1] = sum(spins) # magnetization
-    E[1] = energy(spins, h)
+    M = zeros(typeof(M0), steps)
+    E = zeros(typeof(E0), steps)
+
+    M[1] = M0
+    E[1] = E0
 
     #= Track the history of configurations only every 'save_interval' steps. =#
     spins_t = zeros(Int8, size(spins)..., length(1:save_interval:steps))
