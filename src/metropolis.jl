@@ -71,10 +71,10 @@ current value `s[i]` to `-s[i]`.
 We assume that ΔE > 0, since this is the only case in which this function is called
 in the Metropolis algorithm.
 Note that `S` can only take the values -4, -2, 0, 2, 4, and therefore
-`(S + 4) ÷ 2 + 1 ∈ (1, 2, 3, 4, 5)`.
+`(S + 4) ÷ 2 + 1`` takes the values `(1, 2, 3, 4, 5)`.
 """
 function metropolis_acceptance_probabilities(β::Real, h::Real = false)
     S = (-4, -2, 0, 2, 4)
-    ΔE = 2 .* (S .+ h)
-    return exp.(-β .* ΔE)
+    ΔE = @. 2abs(S + h)
+    return @. exp(-β * ΔE)
 end
