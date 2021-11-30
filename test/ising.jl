@@ -19,6 +19,14 @@ end
     @test size(Ising.random_configuration(20, 40)) == (20, 40)
 end
 
+@testset "Ising adjacency_matrix" begin
+    L = 7; K = 4;
+    A = Ising.adjacency_matrix(L, K)
+    @test size(A) == (L * K, L * K)
+    @test iszero(diag(A))
+    @test sum(A) == 4 * L * K # graph degree sum formula
+end
+
 @testset "neighbor sum" begin
     spins = Int8[
         +1  +1  +1;
