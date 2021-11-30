@@ -48,15 +48,15 @@ end
 function metropolis_step!(spins::AbstractMatrix, h::Real = false; t, M, E, Paccept)
     i, j = rand.(Base.OneTo.(size(spins)))
     S = neighbor_sum_div_2(spins, i, j)
+    M[t] = M[t - 1]
+    E[t] = E[t - 1]
     ΔE = 2 * (2S + h) * spins[i,j]
     if ΔE ≤ 0 || rand() < Paccept[S + 3]
-        M[t] = M[t - 1] - 2spins[i,j]
-        E[t] = E[t - 1] + ΔE
         spins[i,j] = -spins[i,j]
+        M[t] += 2spins[i,j]
+        E[t] += ΔE
         return true
     else
-        M[t] = M[t - 1]
-        E[t] = E[t - 1]
         return false
     end
 end
