@@ -88,7 +88,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="susceptibili
     χ = zeros(length(βs))
     for (k, β) in enumerate(βs)
         spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.hybrid!(spins, β, steps=T10^6)
+        spins_t, M, E = Ising.hybrid!(spins, β; steps=10^6)
         χ[k] = β/length(spins) * var(abs.(M))
     end
     scatter!(ax, Ts, χ, color=color, markersize=5, label=L"L=%$L")
@@ -116,7 +116,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="heat capacit
     C = zeros(length(βs))
     for (k, β) in enumerate(βs)
         spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.hybrid!(spins, β, steps=T10^7)
+        spins_t, M, E = Ising.hybrid!(spins, β; steps=10^7)
         C[k] = β^2/length(spins) * var(E)
     end
     scatter!(ax, Ts, C, color=color, markersize=5, label=L"L=%$L")
