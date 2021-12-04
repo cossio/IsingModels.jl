@@ -49,16 +49,14 @@ fig
 import SquareIsingModel as Ising
 using CairoMakie, Random
 
-Random.seed!(1) # make reproducible
-L = 50
+Random.seed!(5) # make reproducible
 β = Ising.βc
-T = 20
 Δ = 5
-spins = Ising.random_configuration(L)
-Ising.metropolis!(spins, β; steps=10^6) # equilibrate a bit to get clusters
-spins_t, M, E = Ising.hybrid!(spins, β; steps=T, save_interval = 1, local_steps = Δ)
+spins = Ising.random_configuration(32)
+Ising.metropolis!(spins, β; steps=10^6) # equilibrate a bit to get some clusters
+spins_t, M, E = Ising.hybrid!(spins, β; steps=20, save_interval = 1, local_steps = Δ)
 fig = Figure(resolution=(600, 500))
-for t ∈ 1:T
+for t ∈ 1:size(spins_t, 3)
     ax = Axis(fig[cld(t, Δ), mod1(t, Δ)])
     hidedecorations!(ax)
     heatmap!(ax, spins_t[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
