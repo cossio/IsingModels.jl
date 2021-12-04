@@ -56,3 +56,12 @@ end
         end
     end
 end
+
+@testset "flip_cluster" begin
+    σ = bitrand(64, 64)
+    s = Ising.ising.(σ)
+    c = bitrand(64, 64)
+    Ising.flip_cluster!(σ, c)
+    Ising.flip_cluster!(s, c)
+    @test s == Ising.ising.(σ)
+end
