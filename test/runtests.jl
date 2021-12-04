@@ -5,3 +5,4 @@ using Test, SafeTestsets, SquareIsingModel
 @safetestset "metropolis" begin include("metropolis.jl") end
 @safetestset "wolff" begin include("wolff.jl") end
 @safetestset "hybrid" begin include("hybrid.jl") end
+@safetestset "bit" begin include("bit.jl") end

@@ -8,7 +8,7 @@ sampled at intervals `save_interval` (by default equals the number of sites),
 `M` is the record of magnetizations, and `E` the record of energies.
 """
 function metropolis!(
-    spins::AbstractMatrix{Int8},
+    spins::AbstractMatrix,
     β::Real,
     h::Real = false;
     steps::Int = 1,
@@ -22,7 +22,7 @@ function metropolis!(
     Paccept = metropolis_acceptance_probabilities(β, h)
 
     #= Track history of magnetization and energy =#
-    M0 = sum(spins) # magnetization
+    M0 = magnetization(spins)
     E0 = energy(spins, h)
 
     M = zeros(typeof(M0), steps)
@@ -32,7 +32,7 @@ function metropolis!(
     E[1] = E0
 
     #= Track the history of configurations only every 'save_interval' steps. =#
-    spins_t = zeros(Int8, size(spins)..., length(1:save_interval:steps))
+    spins_t = zeros(eltype(spins), size(spins)..., length(1:save_interval:steps))
     spins_t[:,:,1] .= spins
 
     for t ∈ 2:steps
@@ -45,15 +45,15 @@ function metropolis!(
     return spins_t, M, E
 end
 
-function metropolis_step!(spins::AbstractMatrix, h::Real = false; t, M, E, Paccept)
-    i, j = rand.(Base.OneTo.(size(spins)))
-    S = neighbor_sum_div_2(spins, i, j)
+function metropolis_step!(s::AbstractMatrix, h::Real = false; t, M, E, Paccept)
+    i, j = rand.(Base.OneTo.(size(s)))
+    S = neighbor_sum_div_2(s, i, j)
     M[t] = M[t - 1]
     E[t] = E[t - 1]
-    ΔE = 2 * (2S + h) * spins[i,j]
+    ΔE = 2 * (2S + h) * ising(s[i,j])
     if ΔE ≤ 0 || rand() < Paccept[S + 3]
-        spins[i,j] = -spins[i,j]
-        M[t] += 2spins[i,j]
+        s[i,j] = flip(s[i,j])
+        M[t] += 2ising(s[i,j])
         E[t] += ΔE
         return true
     else

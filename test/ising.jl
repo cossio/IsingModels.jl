@@ -99,7 +99,7 @@ end
     L = 10
     K = 15
     s = Ising.random_configuration(L, K)
-    @test 2Ising.energy(s) ≈ -sum(s[i,j] * Ising.neighbor_sum(s,i,j) for i in 1:L, j in 1:K)
+    @test 2Ising.energy(s) == -sum(s[i,j] * Ising.neighbor_sum(s,i,j) for i in 1:L, j in 1:K)
     h = randn()
     @test Ising.energy(s, h) ≈ Ising.energy(s) - h * sum(s)
 end

@@ -6,7 +6,7 @@ move, then another `local_steps` of Metropolis sampling, one more Wolff cluster 
 and so on.
 """
 function hybrid!(
-    spins::AbstractMatrix{Int8},
+    spins::AbstractMatrix,
     β::Real;
     steps::Int = 1,
     save_interval::Int = length(spins),
@@ -20,11 +20,11 @@ function hybrid!(
     M = zeros(Int, steps)
     E = zeros(Int, steps)
 
-    M[1] = sum(spins) # magnetization
+    M[1] = magnetization(spins)
     E[1] = energy(spins)
 
     #= Track the history of configurations only every 'save_interval' steps. =#
-    spins_t = zeros(Int8, size(spins)..., length(1:save_interval:steps))
+    spins_t = zeros(eltype(spins), size(spins)..., length(1:save_interval:steps))
     spins_t[:,:,1] .= spins
 
     Pmet = metropolis_acceptance_probabilities(β)
@@ -58,7 +58,7 @@ HybridStats() = HybridStats(0, 0, 0, 0)
 Same as `hybrid!`, but adjusts numbers of Metropolis and Wolff steps dynamically.
 """
 function dynamic_hybrid!(
-    spins::AbstractMatrix{Int8},
+    spins::AbstractMatrix,
     β::Real;
     steps::Int = 1,
     save_interval::Int = length(spins),
@@ -75,7 +75,7 @@ function dynamic_hybrid!(
     E[1] = energy(spins)
 
     #= Track the history of configurations only every 'save_interval' steps. =#
-    spins_t = zeros(Int8, size(spins)..., length(1:save_interval:steps))
+    spins_t = zeros(eltype(spins), size(spins)..., length(1:save_interval:steps))
     spins_t[:,:,1] .= spins
 
     Pmet = metropolis_acceptance_probabilities(β)

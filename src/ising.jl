@@ -13,33 +13,60 @@ function adjacency_matrix(L::Int, K::Int = L)
 end
 
 """
+    ising(s)
+
+Returns `+1` or `-1`, from different representations of a spin.
+"""
+ising(s::Signed) = ifelse(s > 0, oftype(s, 1), oftype(s, -1))
+ising(σ::Bool) = Int8(2σ - 1)
+
+"""
+    binary(s)
+
+Returns `true` or `false`, from different representations of a spin.
+"""
+binary(s::Signed) = s > 0
+binary(σ::Bool) = σ
+
+"""
     energy(spins, h = 0)
 
 Computes the energy of `spins` in the Ising 2-dimensional model.
 """
-function energy(spins::AbstractMatrix{Int8})
-    L, K = size(spins)
-    E = 0
-    for i = 1:L, j = 1:K
-        E -= spins[i,j] * (spins[mod1(i + 1, L), j] + spins[i, mod1(j + 1, K)])
-    end
-    return E
+function energy(s::AbstractMatrix{T}) where {T<:Signed}
+    L, K = size(s)
+    τ = ising.(s)
+    return -sum(τ .* (τ[mod1.(2:(L + 1), L), :] .+ τ[:, mod1.(2:(K + 1), K)]))
 end
 
-energy(spins::AbstractMatrix{Int8}, h::Real) = energy(spins) - h * sum(spins)
+energy(s::AbstractMatrix{T}, h::Real) where {T<:Signed} = energy(s) - h * sum(ising, s)
+
+function energy(σ::AbstractMatrix{Bool})
+    L, K = size(σ)
+    couplings = σ .* (σ[mod1.(2:(L + 1), L), :] .+ σ[:, mod1.(2:(K + 1), K)])
+    return -4sum(couplings) + 8sum(σ) - 2length(σ)
+end
+
+energy(σ::AbstractMatrix{Bool}, h::Real) = energy(σ) - 2h * sum(σ) + h * length(σ)
+
+magnetization(s::AbstractMatrix{T})  where {T<:Signed} = sum(ising, s)
+magnetization(σ::AbstractMatrix{Bool}) = 2sum(σ) - length(σ)
+
+flip(s::Signed) = ifelse(s > 0, oftype(s, -1), oftype(s, 1))
+flip(σ::Bool) = !σ
 
 """
     neighbor_sum(spins, i, j)
 
 Sum of spins in neighbor sites of (i, j).
 """
-function neighbor_sum(spins::AbstractMatrix{Int8}, i::Int, j::Int)
-    L, K = size(spins)
+function neighbor_sum(s::AbstractMatrix, i::Int, j::Int)
+    L, K = size(s)
     @assert (1 ≤ i ≤ L) && (1 ≤ j ≤ K)
-    top = spins[mod1(i + 1, L), j]
-    bot = spins[mod1(i - 1, L), j]
-    lef = spins[i, mod1(j + 1, K)]
-    rig = spins[i, mod1(j - 1, K)]
+    top = ising(s[mod1(i + 1, L), j])
+    bot = ising(s[mod1(i - 1, L), j])
+    lef = ising(s[i, mod1(j + 1, K)])
+    rig = ising(s[i, mod1(j - 1, K)])
     return top + bot + lef + rig
 end
 
@@ -48,13 +75,13 @@ end
 
 neighbor_sum(spins, i, j) is always even. Therefore here we compute the sum, divided by 2.
 """
-function neighbor_sum_div_2(spins::AbstractMatrix{Int8}, i::Int, j::Int)
-    L, K = size(spins)
+function neighbor_sum_div_2(s::AbstractMatrix, i::Int, j::Int)
+    L, K = size(s)
     @assert (1 ≤ i ≤ L) && (1 ≤ j ≤ K)
-    top = spins[mod1(i + 1, L), j] > 0
-    bot = spins[mod1(i - 1, L), j] > 0
-    lef = spins[i, mod1(j + 1, K)] > 0
-    rig = spins[i, mod1(j - 1, K)] > 0
+    top = s[mod1(i + 1, L), j] > 0
+    bot = s[mod1(i - 1, L), j] > 0
+    lef = s[i, mod1(j + 1, K)] > 0
+    rig = s[i, mod1(j - 1, K)] > 0
     return top + bot + lef + rig - 2
 end
 
@@ -75,22 +102,26 @@ function neighbors(L::Int, K::Int, i::Int, j::Int)
 end
 
 neighbors(L::Int, i::Int, j::Int) = neighbors(L, L, i, j)
-neighbors(spins::AbstractMatrix, i::Int, j::Int) = neighbors(size(spins)..., i, j)
+neighbors(s::AbstractMatrix, i::Int, j::Int) = neighbors(size(s)..., i, j)
 
 """
     random_configuration(L, K = L)
 
 Generate a random spin configuration.
 """
-random_configuration(::Type{Int8}, L::Int, K::Int = L) = rand((Int8(1), Int8(-1)), L, K)
+function random_configuration(::Type{T}, L::Int, K::Int = L) where {T<:Signed}
+    return rand(T.((-1, 1)), L, K)
+end
+random_configuration(::Type{Bool}, L::Int, K::Int = L) = bitrand(L, K)
 random_configuration(L::Int, K::Int = L) = random_configuration(Int8, L, K)
 
 """
     random_magnetized_configuration(M, L, K = L)
 
 Generate a random spin configuration with magnetization (sum over all spins) equal to `M`.
+You must make sure that the given value `M` is feasible.
 """
-function random_magnetized_configuration(M::Int, L::Int, K::Int = L)
+function random_magnetized_configuration(::Type{Bool}, M::Int, L::Int, K::Int = L)
     N = L * K
     @assert -N ≤ M ≤ N
     @assert iseven(N + M) # 2 * number of +1 spins
@@ -98,12 +129,23 @@ function random_magnetized_configuration(M::Int, L::Int, K::Int = L)
     Np = (N + M) ÷ 2 # number of +1 spins
     Nm = (N - M) ÷ 2 # number of +1 spins
     @assert Np + Nm == N
-    spins = zeros(Int8, L, K)
+    spins = falses(L, K)
     p = randperm(L * K)
-    spins[p[1:Np]] .= +1
-    spins[p[(end - Nm + 1):end]] .= -1
-    @assert all((spins .== 1) .| (spins .== -1))
+    spins[p[1:Np]] .= true
+    spins[p[(end - Nm + 1):end]] .= false
+    @assert all((spins .== true) .| (spins .== false))
     return spins
+end
+
+function random_magnetized_configuration(
+    ::Type{T}, M::Int, L::Int, K::Int = L
+) where {T<:Signed}
+    σ = random_magnetized_configuration(Bool, M, L, K)
+    return T.(ising.(σ))
+end
+
+function random_magnetized_configuration(M::Int, L::Int, K::Int = L)
+    return random_magnetized_configuration(Int8, M, L, K)
 end
 
 """
@@ -139,4 +181,5 @@ function distance_matrix(L::Int, K::Int = L)
     d = reshape(dx, L, 1) .+ reshape(dy, 1, K)
     return sqrt.(d)
 end
-distance_matrix(spins::AbstractMatrix) = distance_matrix(size(spins)...)
+
+distance_matrix(s::AbstractMatrix) = distance_matrix(size(s)...)
