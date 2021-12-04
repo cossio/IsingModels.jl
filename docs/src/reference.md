@@ -17,6 +17,9 @@ SquareIsingModel.random_configuration
 ```@docs
 SquareIsingModel.βc
 SquareIsingModel.onsager_magnetization
+SquareIsingModel.onsager_internal_energy
+SquareIsingModel.onsager_heat_capacity
+SquareIsingModel.kramers_wannier
 ```
 
 ## Monte Carlo simulations
