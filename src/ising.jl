@@ -1,14 +1,24 @@
 """
-    adjacency_matrix(L, K = L)
+    adjacency_tensor(L, K = L)
 
-Adjacency matrix of a L x K rectangular grid lattice.
+Adjacency tensor of a L x K rectangular grid lattice.
 """
-function adjacency_matrix(L::Int, K::Int = L)
+function adjacency_tensor(L::Int, K::Int = L)
     A = falses(L, K, L, K)
     for i in 1:L, j in 1:K, d in (-1, 1)
         A[i, j, mod1(i + d, L), j] = true
         A[i, j, i, mod1(j + d, K)] = true
     end
+    return A
+end
+
+"""
+    adjacency_matrix(L, K = L)
+
+Adjacency matrix of a L x K rectangular grid lattice.
+"""
+function adjacency_matrix(L::Int, K::Int = L)
+    A = adjacency_tensor(L, K)
     return reshape(A, L * K, L * K)
 end
 
