@@ -15,6 +15,7 @@ end
 @testset "Ising grid lattice" begin
     s = @inferred Ising.random_configuration(50)
     @test Ising.neighbor_sum(s, 5, 5) == s[5,4] + s[5,6] + s[4,5] + s[6,5]
+    @test Ising.neighbor_sum(s, 3, 4) == sum(s[i,j] for (i,j) in Ising.neighbors(50, 3, 4))
     @test size(Ising.random_configuration(50)) == (50, 50)
     @test size(Ising.random_configuration(20, 40)) == (20, 40)
 end
