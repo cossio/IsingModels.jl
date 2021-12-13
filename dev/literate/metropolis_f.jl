@@ -76,7 +76,7 @@ for iw in CartesianIndices(ws),
         spins = Ising.random_configuration(L)
         for (k, β) in enumerate(βs)
             f(M) = w * abs(M) / β
-            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^2, f=f)
+            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
             m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
             mavg[k] = mean(m)
             mstd[k] = std(m)
@@ -123,7 +123,7 @@ for iw in CartesianIndices(ws)
         spins = Ising.random_configuration(L)
         for (k, β) in enumerate(βs)
             f(M) = logcosh(w * M) / β
-            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^2, f=f)
+            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
             m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
             mavg[k] = mean(m)
             mstd[k] = std(m)
