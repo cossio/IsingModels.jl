@@ -57,14 +57,19 @@ so that the overall system looks like this:
 We now simulate a range of values of `w` and some system sizes.
 =#
 
-ws = [0 1e-2; 1e-1 1; 10 100] # values of w
+ws = [
+    0 1e-7;
+    1e-6 1e-5;
+    1e-4 1e-3;
+    1e-2 1e-1
+] # values of w
 Ls = [32, 64] # system size
 nothing #hide
 
 # Simulate!
 
 colors = [:blue, :red]
-fig = Figure(resolution=(1000, 150 * length(ws)))
+fig = Figure(resolution=(450 * size(ws, 2), 250 * size(ws, 1)))
 for iw in CartesianIndices(ws),
     w = ws[iw]
     ax = Axis(fig[Tuple(iw)...], xlabel="β", ylabel="m", title="w=$w")
@@ -111,7 +116,7 @@ end
 # Now we are ready to run the simulation.
 
 colors = [:blue, :red]
-fig = Figure(resolution=(1000, 150 * length(ws)))
+fig = Figure(resolution=(450 * size(ws, 2), 250 * size(ws, 1)))
 for iw in CartesianIndices(ws)
     w = ws[iw]
     ax = Axis(fig[Tuple(iw)...], xlabel="β", ylabel="m", title="w=$w")
