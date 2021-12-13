@@ -1,11 +1,12 @@
 module SquareIsingModel
     using Statistics, LinearAlgebra, Random
-    using SpecialFunctions: ellipk, ellipe
+    import SpecialFunctions
 
     include("onsager.jl")
     include("ising.jl")
 
     include("metropolis.jl")
+    include("metropolis_f.jl")
     include("wolff.jl")
     include("hybrid.jl")
 end # module

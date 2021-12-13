@@ -31,3 +31,6 @@ Manifest.toml
 
 # Specific files
 test/profile.jl
+
+# files generated automatically by Literate.jl
+docs/src/literate/*.md

@@ -50,10 +50,11 @@ function metropolis_step!(s::AbstractMatrix, h::Real = false; t, M, E, Paccept)
     S = neighbor_sum_div_2(s, i, j)
     M[t] = M[t - 1]
     E[t] = E[t - 1]
-    ΔE = 2 * (2S + h) * ising(s[i,j])
+    ΔM = -2 * ising(s[i,j])
+    ΔE = -ΔM * (2S + h)
     if ΔE ≤ 0 || rand() < Paccept[S + 3]
         s[i,j] = flip(s[i,j])
-        M[t] += 2ising(s[i,j])
+        M[t] += ΔM
         E[t] += ΔE
         return true
     else
