@@ -22,7 +22,14 @@ Also note that the temperature multiplies both the original Ising energy, and ``
 
 Therefore the system prefers configurations with *lower* values of `f(M)`.
 
-Let's look at some examples.
+We will consider the above energy with the modified term ``f(M) = w|M|/\beta``.
+Here ``|M|`` is the absolute value of the magnetization.
+``w`` is a factor that weights this term in the energy, and we divide by ``\beta``,
+so that the overall system looks like this:
+
+```math
+- \beta E = \beta\sum_{\langle i,j\rangle} s_i s_j - w|M|
+```
 
 First load required packages.
 =#
@@ -37,61 +44,32 @@ nothing #hide
 Random.seed!(1)
 nothing #hide
 
-# Define the temperatures we will consider.
+# Define the parameter ranges we will consider.
 
-βs = 0:0.025:1
+βs = [0.4, 0.5, 0.6] # inverse temperatures
+ws = 0:0.001:0.050 # weight of extra term
+Ls = [32, 64]
 nothing #hide
 
-#=
-We will consider the above energy with the modified term ``f(M) = w|M|/\beta``.
-Here ``|M|`` is the absolute value of the magnetization.
-``w`` is a factor that weights this term in the energy, and we divide by ``\beta``,
-so that the overall system looks like this:
+# Simulate and collect data.
 
-```math
-- \beta E = \beta\sum_{\langle i,j\rangle} s_i s_j - w|M|
-```
-=#
+magnetization_data = Dict()
 
-#=
-We now simulate a range of values of `w` and some system sizes.
-=#
-
-ws = [
-    1e-3 3e-3;
-    5e-3 7e-3;
-    9e-3 1e-2;
-    3e-2 5e-2;
-] # values of w
-Ls = [32, 64] # system size
-nothing #hide
-
-# Simulate!
-
-colors = [:blue, :red]
-fig = Figure(resolution=(450 * size(ws, 2), 250 * size(ws, 1)))
-for iw in CartesianIndices(ws),
-    w = ws[iw]
-    ax = Axis(fig[Tuple(iw)...], xlabel="β", ylabel="m", title="w=$w")
-    lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="Onsager's M")
-
-    for (iL, L) in enumerate(Ls)
-        mavg = zeros(length(βs))
-        mstd = zeros(length(βs))
-        spins = Ising.random_configuration(L)
-        for (k, β) in enumerate(βs)
-            f(M) = w * abs(M)
-            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-            m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
-            mavg[k] = mean(m)
-            mstd[k] = std(m)
-        end
-        scatter!(ax, βs, mavg, color=colors[iL], markersize=5, label="L=$L")
-        errorbars!(ax, βs, mavg, mstd/2, color=colors[iL], whiskerwidth=5)
+for β in βs, w in ws, L in Ls
+    spins = Ising.random_configuration(L)
+    secs = @elapsed begin
+        f(M) = w * abs(M) / β
+        spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
+        magnetization_data[(β=β, w=w, L=L)] = M
     end
+    println("Simulation β=$β, w=$w, L=$L done (took $secs seconds)...")
+end
 
-    if Tuple(iw) == (1, 1)
-        axislegend(ax, position=:lt)
+fig = Figure(resolution=(1000, 400))
+for (iL, L) in enumerate(Ls)
+    ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
+    for (iβ, β) in enumerate(βs)
+        lines!(ax, ws, [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws], label="β=$β")
     end
 end
 fig
@@ -104,41 +82,25 @@ We now try the function ``f(M) = \log\cosh(wM) / \beta``, so that:
 ```
 =#
 
-#=
-First let's define a function to compute `log(cosh(x))` in a numerically stable way.
-=#
+logcosh(x::Real) = abs(x) + log1pexp(-2 * abs(2)) - logtwo
 
-function logcosh(x::Real)
-    abs_x = abs(x)
-    return abs_x + log1pexp(-2 * abs_x) - logtwo
+magnetization_data = Dict()
+
+for β in βs, w in ws, L in Ls
+    spins = Ising.random_configuration(L)
+    secs = @elapsed begin
+        f(M) = logcosh(w * M) / β
+        spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
+        magnetization_data[(β=β, w=w, L=L)] = M
+    end
+    println("Simulation β=$β, w=$w, L=$L done (took $secs seconds)...")
 end
 
-# Now we are ready to run the simulation.
-
-colors = [:blue, :red]
-fig = Figure(resolution=(450 * size(ws, 2), 250 * size(ws, 1)))
-for iw in CartesianIndices(ws)
-    w = ws[iw]
-    ax = Axis(fig[Tuple(iw)...], xlabel="β", ylabel="m", title="w=$w")
-    lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="Onsager's M")
-
-    for (iL, L) in enumerate(Ls)
-        mavg = zeros(length(βs))
-        mstd = zeros(length(βs))
-        spins = Ising.random_configuration(L)
-        for (k, β) in enumerate(βs)
-            f(M) = logcosh(w * M)
-            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-            m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
-            mavg[k] = mean(m)
-            mstd[k] = std(m)
-        end
-        scatter!(ax, βs, mavg, color=colors[iL], markersize=5, label="L=$L")
-        errorbars!(ax, βs, mavg, mstd/2, color=colors[iL], whiskerwidth=5)
-    end
-
-    if Tuple(iw) == (1, 1)
-        axislegend(ax, position=:lt)
+fig = Figure(resolution=(1000, 400))
+for (iL, L) in enumerate(Ls)
+    ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
+    for (iβ, β) in enumerate(βs)
+        lines!(ax, ws, [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws], label="β=$β")
     end
 end
 fig
