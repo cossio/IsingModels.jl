@@ -6,6 +6,7 @@ import SquareIsingModel as Ising
 using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
+nothing #hide
 
 # Define the temperatures we will consider.
 
