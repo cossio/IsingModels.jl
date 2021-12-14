@@ -58,10 +58,10 @@ We now simulate a range of values of `w` and some system sizes.
 =#
 
 ws = [
-    0 1e-7;
-    1e-6 1e-5;
-    1e-4 1e-3;
-    1e-2 1e-1
+    1e-3 3e-3;
+    5e-3 7e-3;
+    9e-3 1e-2;
+    3e-2 5e-2;
 ] # values of w
 Ls = [32, 64] # system size
 nothing #hide
@@ -80,7 +80,7 @@ for iw in CartesianIndices(ws),
         mstd = zeros(length(βs))
         spins = Ising.random_configuration(L)
         for (k, β) in enumerate(βs)
-            f(M) = w * abs(M) / β
+            f(M) = w * abs(M)
             spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
             m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
             mavg[k] = mean(m)
@@ -90,7 +90,7 @@ for iw in CartesianIndices(ws),
         errorbars!(ax, βs, mavg, mstd/2, color=colors[iL], whiskerwidth=5)
     end
 
-    if Tuple(iw) == (1,1)
+    if Tuple(iw) == (1, 1)
         axislegend(ax, position=:lt)
     end
 end
@@ -127,7 +127,7 @@ for iw in CartesianIndices(ws)
         mstd = zeros(length(βs))
         spins = Ising.random_configuration(L)
         for (k, β) in enumerate(βs)
-            f(M) = logcosh(w * M) / β
+            f(M) = logcosh(w * M)
             spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
             m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
             mavg[k] = mean(m)
@@ -137,7 +137,7 @@ for iw in CartesianIndices(ws)
         errorbars!(ax, βs, mavg, mstd/2, color=colors[iL], whiskerwidth=5)
     end
 
-    if Tuple(iw) == (1,1)
+    if Tuple(iw) == (1, 1)
         axislegend(ax, position=:lt)
     end
 end
