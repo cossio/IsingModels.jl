@@ -4,7 +4,7 @@
 ## Magnetization as a function of temperature
 
 ```@example
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
@@ -46,7 +46,7 @@ fig
 ## Wolff steps are mixed with Metropolis steps
 
 ```@example
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 using CairoMakie, Random
 
 Random.seed!(5) # make reproducible
@@ -74,7 +74,7 @@ It can be seen that the next row has suffered a larger change, since a cluster w
 
 ```@example
 using Statistics, CairoMakie, Random
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 
 Random.seed!(1) # make reproducible
 Ts = 2:0.01:3
@@ -102,7 +102,7 @@ fig
 
 ```@example
 using Statistics, CairoMakie, Random
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 
 Random.seed!(1) # make reproducible
 Ts = 1.5:0.01:3
@@ -134,7 +134,7 @@ The crossing point approaches the critical temperature for larger system sizes.
 
 ```@example
 using Statistics, CairoMakie, Random
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 
 Random.seed!(1) # make reproducible
 Ts = 1:0.5:5

@@ -115,15 +115,29 @@ neighbors(L::Int, i::Int, j::Int) = neighbors(L, L, i, j)
 neighbors(s::AbstractMatrix, i::Int, j::Int) = neighbors(size(s)..., i, j)
 
 """
-    random_configuration(L, K = L)
+    random_configuration(T, L, K = L)
 
-Generate a random spin configuration.
+Generate a random spin configuration using data type `T`.
 """
 function random_configuration(::Type{T}, L::Int, K::Int = L) where {T<:Signed}
     return rand(T.((-1, 1)), L, K)
 end
 random_configuration(::Type{Bool}, L::Int, K::Int = L) = bitrand(L, K)
+
+"""
+    random_configuration(L, K = L)
+
+Generate a random spin configuration.
+"""
 random_configuration(L::Int, K::Int = L) = random_configuration(Int8, L, K)
+
+"""
+    random_configuration!(spins)
+
+Writes a random configurations to array `spins`.
+"""
+random_configuration!(s::AbstractMatrix{<:Bool}) = rand!(s)
+random_configuration!(s::AbstractMatrix{T}) where {T<:Signed} = rand!(s, (one(T), -one(T)))
 
 """
     random_magnetized_configuration(M, L, K = L)

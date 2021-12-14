@@ -1,3 +1,3 @@
 using Test, Random, LinearAlgebra, Statistics
 using Zygote
-import SquareIsingModel as Ising
+import IsingModel2D as Ising

@@ -34,7 +34,7 @@ so that the overall system looks like this:
 First load required packages.
 =#
 
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 using Statistics, Random
 using LogExpFunctions, CairoMakie, IrrationalConstants
 nothing #hide
@@ -62,7 +62,6 @@ for β in βs, w in ws, L in Ls
         spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
         magnetization_data[(β=β, w=w, L=L)] = M
     end
-    println("Simulation β=$β, w=$w, L=$L done (took $secs seconds)...")
 end
 
 fig = Figure(resolution=(1000, 400))
@@ -72,6 +71,7 @@ for (iL, L) in enumerate(Ls)
         lines!(ax, ws, [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws], label="β=$β")
     end
 end
+axislegend(ax, position=:rt)
 fig
 
 #=
@@ -93,7 +93,6 @@ for β in βs, w in ws, L in Ls
         spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
         magnetization_data[(β=β, w=w, L=L)] = M
     end
-    println("Simulation β=$β, w=$w, L=$L done (took $secs seconds)...")
 end
 
 fig = Figure(resolution=(1000, 400))
@@ -103,4 +102,5 @@ for (iL, L) in enumerate(Ls)
         lines!(ax, ws, [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws], label="β=$β")
     end
 end
+axislegend(ax, position=:rt)
 fig

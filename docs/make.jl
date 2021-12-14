@@ -1,5 +1,5 @@
 using Documenter, Literate
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 
 #=
 We place Literate.jl source .jl files and the generated .md files inside docs/src/literate.
@@ -42,7 +42,7 @@ Build docs.
 =#
 makedocs(
     modules = [Ising],
-    sitename = "SquareIsingModel.jl",
+    sitename = "IsingModel2D.jl",
     pages = [
         "Home" => "index.md",
         "The Ising Model" => "ising.md",
@@ -69,6 +69,6 @@ clear_md_files(literate_dir)
 Deploy docs to Github pages.
 =#
 deploydocs(
-    repo = "github.com/cossio/SquareIsingModel.jl.git",
+    repo = "github.com/cossio/IsingModel2D.jl.git",
     devbranch = "main"
 )

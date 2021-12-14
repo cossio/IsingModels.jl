@@ -2,7 +2,7 @@
 
 ## Magnetization as a function of temperature
 
-import SquareIsingModel as Ising
+import IsingModel2D as Ising
 using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
