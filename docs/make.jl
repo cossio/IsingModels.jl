@@ -47,7 +47,6 @@ makedocs(
         "Home" => "index.md",
         "The Ising Model" => "ising.md",
         "Examples (MD)" => [
-            "Metropolis sampler" => "examples/metropolis.md",
             "Wolff sampler" => "examples/wolff.md",
             "Hybrid sampler" => "examples/hybrid.md",
         ],
