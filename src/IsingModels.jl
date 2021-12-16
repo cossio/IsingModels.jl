@@ -9,4 +9,6 @@ module IsingModels
     include("metropolis_f.jl")
     include("wolff.jl")
     include("hybrid.jl")
+
+    include("curie_weiss.jl")
 end # module
