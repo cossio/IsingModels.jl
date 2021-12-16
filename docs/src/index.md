@@ -1,4 +1,4 @@
-# IsingModel2D.jl Documentation
+# IsingModels.jl Documentation
 
 *A simple Julia package to simulate the Ising model in a two-dimensional rectangular grid.*
 

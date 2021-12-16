@@ -4,7 +4,7 @@
 ## Magnetization as a function of temperature
 
 ```@example
-import IsingModel2D as Ising
+import IsingModels as Ising
 using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible

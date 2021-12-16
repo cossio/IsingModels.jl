@@ -1,5 +1,5 @@
 using Test, SafeTestsets
-import IsingModel2D as Ising
+import IsingModels as Ising
 
 @safetestset "onsager" begin include("onsager.jl") end
 @safetestset "ising" begin include("ising.jl") end

@@ -34,7 +34,7 @@ so that the overall system looks like this:
 First load required packages.
 =#
 
-import IsingModel2D as Ising
+import IsingModels as Ising
 using Statistics, Random
 using LogExpFunctions, CairoMakie, IrrationalConstants
 nothing #hide

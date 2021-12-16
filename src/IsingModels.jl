@@ -1,4 +1,4 @@
-module IsingModel2D
+module IsingModels
     using Statistics, LinearAlgebra, Random
     import SpecialFunctions
 

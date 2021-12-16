@@ -4,7 +4,7 @@
 ## Magnetization as a function of temperature
 
 ```@example
-import IsingModel2D as Ising
+import IsingModels as Ising
 using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
@@ -46,7 +46,7 @@ fig
 ## Typical Wolff clusters at criticality
 
 ```@example
-import IsingModel2D as Ising
+import IsingModels as Ising
 using Random, Colors, ColorSchemes, CairoMakie
 
 Random.seed!(62) # reproducibility
@@ -77,7 +77,7 @@ fig
 ## Average size of Wolff's clusters as a function of temperature
 
 ```@example
-import IsingModel2D as Ising
+import IsingModels as Ising
 using Random, Statistics, Colors, ColorSchemes, CairoMakie, ProgressMeter
 
 Random.seed!(1) # make reproducible
@@ -126,7 +126,7 @@ In contrast the Wolff algorihm explores diverse states.
 
 ```@example
 using Statistics, CairoMakie, Random
-import IsingModel2D as Ising
+import IsingModels as Ising
 
 Random.seed!(3) # reproducibility
 
@@ -169,7 +169,7 @@ As the system size grows, the crossing point of the different curves is the crit
 
 ```@example
 using Statistics, CairoMakie, Random
-import IsingModel2D as Ising
+import IsingModels as Ising
 
 Random.seed!(1) # make reproducible
 Ts = 2.2:0.01:2.3
@@ -198,7 +198,7 @@ fig
 
 ```@example
 using Statistics, CairoMakie, Random
-import IsingModel2D as Ising
+import IsingModels as Ising
 
 Random.seed!(1) # make reproducible
 Ts = 1.8:0.01:3
@@ -228,7 +228,7 @@ fig
 
 ```@example
 using Statistics, CairoMakie, Random
-import IsingModel2D as Ising
+import IsingModels as Ising
 
 Random.seed!(1) # make reproducible
 Ts = 1.8:0.05:3
