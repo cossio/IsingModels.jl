@@ -86,7 +86,7 @@ function metropolis_step!(model::CurieWeiss, h::Real = false; t, M, E, β, f = n
         Δf = f(M[t] + ΔM) - f(M[t])
         ΔE += Δf
     end
-    if ΔE ≤ 0 || rand() < exp(-β * ΔE)
+    if ΔE ≤ 0 || randexp() > β * ΔE
         model.spins[i] = flip(model.spins[i])
         M[t] += ΔM
         E[t] += ΔE
@@ -94,4 +94,47 @@ function metropolis_step!(model::CurieWeiss, h::Real = false; t, M, E, β, f = n
     else
         return false
     end
+end
+
+function curie_weiss_rand_m!(model::CurieWeiss{<:Signed}, M::Int)
+    p = randperm(length(model.spins))
+    model.spins[p[begin:M]] .= 1
+    model.spins[p[(M + 1):end]] .= -1
+    return model
+end
+
+function curie_weiss_rand_m!(model::CurieWeiss{Bool}, M::Int)
+    p = randperm(length(model.spins))
+    model.spins[p[begin:M]] .= true
+    model.spins[p[(M + 1):end]] .= false
+    return model
+end
+
+function curie_weiss_rand!(model::CurieWeiss, β::Real, h::Real = false)
+
+end
+
+@doc raw"""
+    curie_weiss_magnetization_rand(N, β, h = 0; f = nothing, B = 1)
+
+Generates a random magnetization of the Curie-Weiss model, that is, a value of
+
+```math
+M = \sum_{i=1}^N s_i
+```
+
+that follows the statistics of the Curie-Weiss model, with energy function:
+
+```math
+E = -\sum_{i < j} s_i s_j - h * \sum_i s_i + f(M)
+```
+
+By default f(M) = 0.
+
+`B` controls the number of samples generated.
+"""
+function curie_weiss_magnetization_rand(
+    N::Int, β::Real, h::Real = false; f = nothing, B::Int = 1
+)
+
 end

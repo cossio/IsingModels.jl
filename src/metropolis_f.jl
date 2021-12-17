@@ -47,7 +47,7 @@ function metropolis_step_f!(s::AbstractMatrix, h::Real = false; t, M, E, β, f)
     ΔM = -2 * ising(s[i,j])
     Δf = f(M[t - 1] + ΔM) - f(M[t - 1])
     ΔE = -ΔM * (2S + h) + Δf
-    if ΔE ≤ 0 || rand() < exp(-β * ΔE)
+    if ΔE ≤ 0 || randexp() > β * ΔE
         s[i,j] = flip(s[i,j])
         M[t] += ΔM
         E[t] += ΔE
