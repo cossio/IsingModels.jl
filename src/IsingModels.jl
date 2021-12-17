@@ -1,6 +1,6 @@
 module IsingModels
     using Statistics, LinearAlgebra, Random
-    import SpecialFunctions
+    import SpecialFunctions, Distributions, LogExpFunctions
 
     include("onsager.jl")
     include("ising.jl")

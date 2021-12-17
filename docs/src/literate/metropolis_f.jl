@@ -57,12 +57,10 @@ nothing #hide
 magnetization_data = Dict()
 
 for β in βs, w in ws, L in Ls
-    secs = @elapsed begin
-        f(M::Real) = w * abs(M) / β
-        spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-        magnetization_data[(β=β, w=w, L=L)] = M
-    end
+    f(M::Real) = w * abs(M) / β
+    spins = Ising.random_configuration(L)
+    spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
+    magnetization_data[(β=β, w=w, L=L)] = M
 end
 
 nothing #hide
@@ -95,12 +93,10 @@ We now try the function ``f(M) = \log\cosh(wM) / \beta``, so that:
 magnetization_data = Dict()
 
 for β in βs, w in ws, L in Ls
-    secs = @elapsed begin
-        f(M) = logcosh(w * M) / β
-        spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-        magnetization_data[(β=β, w=w, L=L)] = M
-    end
+    f(M) = logcosh(w * M) / β
+    spins = Ising.random_configuration(L)
+    spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
+    magnetization_data[(β=β, w=w, L=L)] = M
 end
 
 # Now plot the result.

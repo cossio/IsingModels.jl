@@ -43,13 +43,11 @@ binary(σ::Bool) = σ
 
 Computes the energy of `spins` in the Ising 2-dimensional model.
 """
-function energy(s::AbstractMatrix{T}) where {T<:Signed}
+function energy(s::AbstractMatrix{<:Signed})
     L, K = size(s)
     τ = ising.(s)
     return -sum(τ .* (τ[mod1.(2:(L + 1), L), :] .+ τ[:, mod1.(2:(K + 1), K)]))
 end
-
-energy(s::AbstractMatrix{T}, h::Real) where {T<:Signed} = energy(s) - h * sum(ising, s)
 
 function energy(σ::AbstractMatrix{Bool})
     L, K = size(σ)
@@ -57,10 +55,10 @@ function energy(σ::AbstractMatrix{Bool})
     return -4sum(couplings) + 8sum(σ) - 2length(σ)
 end
 
+energy(s::AbstractMatrix{<:Signed}, h::Real) = energy(s) - h * sum(ising, s)
 energy(σ::AbstractMatrix{Bool}, h::Real) = energy(σ) - 2h * sum(σ) + h * length(σ)
 
-magnetization(s::AbstractMatrix{T})  where {T<:Signed} = sum(ising, s)
-magnetization(σ::AbstractMatrix{Bool}) = 2sum(σ) - length(σ)
+magnetization(s::AbstractMatrix) = sum(ising, s)
 
 flip(s::Signed) = ifelse(s > 0, oftype(s, -1), oftype(s, 1))
 flip(σ::Bool) = !σ
