@@ -1,6 +1,8 @@
 using Documenter, Literate
 import IsingModels as Ising
 
+ENV["JULIA_DEBUG"] = Documenter
+
 #=
 We place Literate.jl source .jl files and the generated .md files inside docs/src/literate.
 =#

@@ -46,9 +46,10 @@ nothing #hide
 
 # Define the parameter ranges we will consider.
 
-βs = [0.4, 0.5, 0.6] # inverse temperatures
 ws = 0:0.001:0.050 # weight of extra term
 Ls = [32, 64]
+βs = [0.4, 0.5, 0.6] # inverse temperatures
+cs = [:red, :purple, :blue] # colors
 nothing #hide
 
 # Simulate and collect data.
@@ -64,11 +65,18 @@ for β in βs, w in ws, L in Ls
     end
 end
 
+nothing #hide
+
+# Now let's plot the results.
+
 fig = Figure(resolution=(1000, 400))
 for (iL, L) in enumerate(Ls)
     ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
-    for (iβ, β) in enumerate(βs)
-        lines!(ax, ws, [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws], label="β=$β")
+    for (iβ, (β, color)) in enumerate(zip(βs, cs))
+        mavg = [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
+        mstd = [std(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
+        lines!(ax, ws, mavg, label="β=$β", color=color, label="β=$β")
+        errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
 end
 axislegend(ax, position=:rt)
@@ -82,7 +90,7 @@ We now try the function ``f(M) = \log\cosh(wM) / \beta``, so that:
 ```
 =#
 
-logcosh(x::Real) = abs(x) + log1pexp(-2 * abs(2)) - logtwo
+# First collect some data.
 
 magnetization_data = Dict()
 
@@ -95,11 +103,16 @@ for β in βs, w in ws, L in Ls
     end
 end
 
+# Now plot the result.
+
 fig = Figure(resolution=(1000, 400))
 for (iL, L) in enumerate(Ls)
     ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
     for (iβ, β) in enumerate(βs)
-        lines!(ax, ws, [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws], label="β=$β")
+        mavg = [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
+        mstd = [std(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
+        lines!(ax, ws, mavg, label="β=$β", color=color, label="β=$β")
+        errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
 end
 axislegend(ax, position=:rt)
