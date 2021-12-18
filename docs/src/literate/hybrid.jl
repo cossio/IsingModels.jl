@@ -1,9 +1,9 @@
+#=
 # Examples using hybrid (Metropolis + Wolff) sampling method
 
-
 ## Magnetization as a function of temperature
+=#
 
-```@example
 import IsingModels as Ising
 using Statistics, CairoMakie, Random, ProgressMeter
 
@@ -16,10 +16,10 @@ lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="analytica
 
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
-spins = Ising.random_configuration(30)
+σ = bitrand(32, 32)
 @showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.hybrid!(spins, β, steps=10^7)
-    m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
+    σ_t, M, E = Ising.hybrid!(σ, β, steps=10^7)
+    m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)
     mstd[k] = std(m)
 end
@@ -28,10 +28,10 @@ errorbars!(ax, βs, mavg, mstd/2, color=:blue, whiskerwidth=5)
 
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
-spins = Ising.random_configuration(70)
-@showprogress for (k,β) in enumerate(βs)
-    spins_t, M, E = Ising.hybrid!(spins, β, steps=10^7)
-    m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
+σ = bitrand(64, 64)
+@showprogress for (k, β) in enumerate(βs)
+    σ_t, M, E = Ising.hybrid!(σ, β, steps=10^7)
+    m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)
     mstd[k] = std(m)
 end
@@ -40,39 +40,39 @@ errorbars!(ax, βs, mavg, mstd/2, color=:red, whiskerwidth=5)
 
 axislegend(ax, position=:rb)
 fig
-```
 
-
+#=
 ## Wolff steps are mixed with Metropolis steps
+=#
 
-```@example
 import IsingModels as Ising
 using CairoMakie, Random
 
 Random.seed!(5) # make reproducible
 β = Ising.βc
 Δ = 5
-spins = Ising.random_configuration(32)
-Ising.metropolis!(spins, β; steps=10^6) # equilibrate a bit to get some clusters
-spins_t, M, E = Ising.hybrid!(spins, β; steps=20, save_interval = 1, local_steps = Δ)
+σ = bitrand(32, 32)
+Ising.metropolis!(σ, β; steps=10^6) # equilibrate a bit to get some clusters
+σ_t, M, E = Ising.hybrid!(σ, β; steps=20, save_interval = 1, local_steps = Δ)
 fig = Figure(resolution=(600, 500))
-for t ∈ 1:size(spins_t, 3)
+for t ∈ 1:size(σ_t, 3)
     ax = Axis(fig[cld(t, Δ), mod1(t, Δ)])
     hidedecorations!(ax)
-    heatmap!(ax, spins_t[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+    heatmap!(ax, σ_t[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
 end
 fig
-```
 
+#=
 In the figure above, each row is a sequence of consecutive Metropolis steps.
 Inside a row the configurations are very similar differing in single sites.
 When the row ends, a Wolff cluster move is taken.
 It can be seen that the next row has suffered a larger change, since a cluster was flipped.
+=#
 
-
+#=
 ## Magnetic susceptibility
+=#
 
-```@example
 using Statistics, CairoMakie, Random
 import IsingModels as Ising
 
@@ -85,9 +85,9 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="susceptibili
 @time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
     χ = zeros(length(βs))
     for (k, β) in enumerate(βs)
-        spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.hybrid!(spins, β; steps=10^6)
-        χ[k] = β/length(spins) * var(abs.(M))
+        σ = bitrand(L, L)
+        σ_t, M, E = Ising.hybrid!(σ, β; steps=10^6)
+        χ[k] = β/length(σ) * var(abs.(M))
     end
     scatter!(ax, Ts, χ, color=color, markersize=5, label=L"L=%$L")
 end
@@ -95,12 +95,11 @@ vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:
 axislegend(ax, position=:rt)
 
 fig
-```
 
-
+#=
 ## Heat capacity
+=#
 
-```@example
 using Statistics, CairoMakie, Random
 import IsingModels as Ising
 
@@ -113,26 +112,25 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="heat capacit
 @time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
     C = zeros(length(βs))
     for (k, β) in enumerate(βs)
-        spins = Ising.random_configuration(L)
-        spins_t, M, E = Ising.hybrid!(spins, β; steps=10^7)
-        C[k] = β^2/length(spins) * var(E)
+        σ = bitrand(L, L)
+        σ_t, M, E = Ising.hybrid!(σ, β; steps=10^7)
+        C[k] = β^2/length(σ) * var(E)
     end
     scatter!(ax, Ts, C, color=color, markersize=5, label=L"L=%$L")
 end
 vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
-axislegend(ax, position=:lt) 
+axislegend(ax, position=:lt)
 
 fig
-```
 
-
+#=
 ## Wolff vs. Metropolis spin flip rates
 
 At low temperatures, Wolff flips more spins per unit time than Metropolis.
 At high temperatures, Metropolis is more efficient.
 The crossing point approaches the critical temperature for larger system sizes.
+=#
 
-```@example
 using Statistics, CairoMakie, Random
 import IsingModels as Ising
 
@@ -146,9 +144,9 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="spin flips /
     wolff_rates = zeros(length(βs))
     local_rates = zeros(length(βs))
     for (k, β) in enumerate(βs)
-        spins = Ising.random_configuration(L)
+        σ = bitrand(L, L)
         stats = Ising.HybridStats()
-        spins_t, M, E = Ising.dynamic_hybrid!(spins, β; steps=10^6, hybrid_stats=stats)
+        σ_t, M, E = Ising.dynamic_hybrid!(σ, β; steps=10^6, hybrid_stats=stats)
         local_rates[k] = stats.local_flip / stats.local_time
         wolff_rates[k] = stats.wolff_flip / stats.wolff_time
     end
@@ -160,4 +158,3 @@ vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linewidth=1
 Legend(fig[1,2], ax)
 
 fig
-```

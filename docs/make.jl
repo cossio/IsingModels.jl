@@ -1,7 +1,7 @@
 using Documenter, Literate
 import IsingModels as Ising
 
-ENV["JULIA_DEBUG"] = Documenter
+ENV["JULIA_DEBUG"] = "Documenter,Literate,IsingModels"
 
 #=
 We place Literate.jl source .jl files and the generated .md files inside docs/src/literate.
@@ -48,12 +48,10 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "The Ising Model" => "ising.md",
-        "Examples (MD)" => [
-            "Wolff sampler" => "examples/wolff.md",
-            "Hybrid sampler" => "examples/hybrid.md",
-        ],
-        "Examples (Literate)" => [
+        "Examples" => [
             "Metropolis" => "literate/metropolis.md",
+            "Wolff sampler" => "literate/wolff.md",
+            "Hybrid sampler" => "literate/hybrid.md",
             "Metropolis+f(M)" => "literate/metropolis_f.md",
         ],
         "Reference" => "reference.md"

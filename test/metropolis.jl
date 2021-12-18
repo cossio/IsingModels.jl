@@ -1,19 +1,26 @@
 include("init.jl")
 
-@testset "metropolis acceptance probabilities" begin
-    β = Ising.βc
-    Paccept = Ising.metropolis_acceptance_probabilities(β)
-    @test length(Paccept) == 5
-end
-
 @testset "metropolis" begin
     L = 50; T = 100; Δ = 12; β = 1.0
-    spins = Ising.random_configuration(L)
-    spins_t, M, E = @inferred Ising.metropolis!(spins, β; steps=T, save_interval=Δ)
+    σ = bitrand(L, L)
+    σ_t, M, E = @inferred Ising.metropolis!(σ, β; steps=T, save_interval=Δ)
     @test length(M) == length(E) == T
-    @test size(spins_t) == (size(spins)..., length(1:Δ:T))
-    @test M[end] == sum(spins)
-    @test E[end] ≈ @inferred Ising.energy(spins)
-    @test M[1:Δ:end] == dropdims(sum(spins_t; dims=(1,2)); dims=(1,2))
-    @test E[1:Δ:end] == Ising.energy.(eachslice(spins_t; dims=3))
+    @test size(σ_t) == (size(σ)..., length(1:Δ:T))
+    @test M[end] == @inferred Ising.magnetization(σ)
+    @test E[end] ≈ @inferred Ising.energy(σ)
+    @test M[1:Δ:end] == Ising.magnetization.(eachslice(σ_t; dims=3))
+    @test E[1:Δ:end] == Ising.energy.(eachslice(σ_t; dims=3))
+end
+
+@testset "metropolis + f(M)" begin
+    L = 50; T = 100; Δ = 12; β = 1.0
+    f = sin
+    σ = bitrand(L, L)
+    σ_t, M, E = @inferred Ising.metropolis!(σ, β; steps=T, save_interval=Δ, f=f)
+    @test length(M) == length(E) == T
+    @test size(σ_t) == (size(σ)..., length(1:Δ:T))
+    @test M[end] ≈ @inferred Ising.magnetization(σ)
+    @test E[end] ≈ @inferred Ising.energy(σ; f=f)
+    @test M[1:Δ:end] ≈ Ising.magnetization.(eachslice(σ_t; dims=3))
+    @test E[1:Δ:end] ≈ Ising.energy.(eachslice(σ_t; dims=3); f=f)
 end

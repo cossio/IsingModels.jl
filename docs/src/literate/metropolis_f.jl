@@ -1,7 +1,7 @@
 # Examples using the Metropolis+F(M) sampling method
 
 #=
-The `metropolis_f!` method samples an energy of the form:
+The `metropolis!(...; f = f)` method samples an energy of the form:
 
 ```math
 E = -\sum_{\langle i,j\rangle} s_i s_j + f(M)
@@ -54,13 +54,15 @@ nothing #hide
 
 # Simulate and collect data.
 
-magnetization_data = Dict()
+magnetization_avg = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
+magnetization_std = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
 
 for β in βs, w in ws, L in Ls
     f(M::Real) = w * abs(M) / β
-    spins = Ising.random_configuration(L)
-    spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-    magnetization_data[(β=β, w=w, L=L)] = M
+    σ = bitrand(L, L)
+    σ_t, M, E = Ising.metropolis!(σ, β; steps=10^7, f=f)
+    magnetization_avg[(β=β, w=w, L=L)] = mean(M)
+    magnetization_std[(β=β, w=w, L=L)] = std(M)
 end
 
 nothing #hide
@@ -71,9 +73,9 @@ fig = Figure(resolution=(1000, 400))
 for (iL, L) in enumerate(Ls)
     ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
     for (iβ, (β, color)) in enumerate(zip(βs, cs))
-        mavg = [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
-        mstd = [std(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
-        lines!(ax, ws, mavg, label="β=$β", color=color, label="β=$β")
+        mavg = [magnetization_avg[(β=β, w=w, L=L)] / L^2 for w in ws]
+        mstd = [magnetization_std[(β=β, w=w, L=L)] / L^2 for w in ws]
+        lines!(ax, ws, mavg, label="β=$β", color=color)
         errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
 end
@@ -90,24 +92,28 @@ We now try the function ``f(M) = \log\cosh(wM) / \beta``, so that:
 
 # First collect some data.
 
-magnetization_data = Dict()
+magnetization_avg = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
+magnetization_std = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
 
 for β in βs, w in ws, L in Ls
     f(M) = logcosh(w * M) / β
-    spins = Ising.random_configuration(L)
-    spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-    magnetization_data[(β=β, w=w, L=L)] = M
+    σ = bitrand(L, L)
+    σ_t, M, E = Ising.metropolis!(σ, β; steps=10^7, f=f)
+    magnetization_avg[(β=β, w=w, L=L)] = mean(M)
+    magnetization_std[(β=β, w=w, L=L)] = std(M)
 end
+
+nothing #hide
 
 # Now plot the result.
 
 fig = Figure(resolution=(1000, 400))
 for (iL, L) in enumerate(Ls)
     ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
-    for (iβ, β) in enumerate(βs)
-        mavg = [mean(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
-        mstd = [std(magnetization_data[(β=β, w=w, L=L)] / L^2) for w in ws]
-        lines!(ax, ws, mavg, label="β=$β", color=color, label="β=$β")
+    for (iβ, (β, color)) in enumerate(zip(βs, cs))
+        mavg = [magnetization_avg[(β=β, w=w, L=L)] / L^2 for w in ws]
+        mstd = [magnetization_std[(β=β, w=w, L=L)] / L^2 for w in ws]
+        lines!(ax, ws, mavg, label="β=$β", color=color)
         errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
 end

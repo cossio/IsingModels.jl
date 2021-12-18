@@ -7,50 +7,54 @@ include("init.jl")
 end
 
 @testset "wolff" begin
-    L = 50; T = 100; Δ = 12; β = 1.0
-    spins = Ising.random_configuration(L)
-    spins_t, M, E = @inferred Ising.wolff!(spins, β; steps=T, save_interval=Δ)
+    L = 50; T = 100; Δ = 12
+    σ = bitrand(L, L)
+    σ_t, M, E = @inferred Ising.wolff!(σ, Ising.βc; steps=T, save_interval=Δ)
     @test length(M) == length(E) == T
-    @test size(spins_t) == (size(spins)..., length(1:Δ:T))
-    @test M[end] == sum(spins)
-    @test E[end] ≈ Ising.energy(spins)
-    @test M[1:Δ:end] == dropdims(sum(spins_t; dims=(1,2)); dims=(1,2))
-    @test E[1:Δ:end] == Ising.energy.(eachslice(spins_t; dims=3))
+    @test size(σ_t) == (size(σ)..., length(1:Δ:T))
+    @test M[end] == Ising.magnetization(σ)
+    @test E[end] ≈ Ising.energy(σ)
+    @test M[1:Δ:end] == Ising.magnetization.(eachslice(σ_t; dims=3))
+    @test E[1:Δ:end] == Ising.energy.(eachslice(σ_t; dims=3))
 end
 
 @testset "wolff cluster" begin
-    spins = Ising.random_configuration(50)
-    β = 0.5
-    @inferred Ising.metropolis!(spins, β; steps=10^6)
-    cluster = @inferred Ising.wolff_cluster(spins, 1, 1, Ising.wolff_padd(β))
-    @test cluster[1, 1]
+    σ = bitrand(50, 50)
+    @inferred Ising.metropolis!(σ, Ising.βc; steps=10^6)
+    i_seed = rand(CartesianIndices(σ))
+    cluster = @inferred Ising.wolff_cluster(σ, i_seed, Ising.wolff_padd(Ising.βc))
+
+    # seed is always flipped
+    @test cluster[i_seed]
+
     # all cluster spins have same sign as the center
-    @test cluster .* spins == spins[1,1] * cluster
+    @test cluster .* σ == σ[i_seed] * cluster
 
     # zero temperature cluster
-    spins = Ising.random_configuration(50)
-    cluster = Set([(1,1)])
-    queue = [(1,1)]
+    σ = bitrand(50, 50)
+    clset = Set([CartesianIndex(1,1)])
+    queue = [first(clset)]
     while !isempty(queue)
-        (i,j) = pop!(queue)
-        for (x,y) in Ising.neighbors(spins, i, j)
-            if spins[x,y] == spins[i,j] && (x,y) ∉ cluster
-                push!(cluster, (x,y))
-                push!(queue, (x,y))
+        i = pop!(queue)
+        for x in Ising.neighbors(CartesianIndices(σ), i)
+            if σ[x] == σ[i] && x ∉ clset
+                push!(clset, x)
+                push!(queue, x)
             end
         end
     end
-    cluster = BitMatrix([(i,j) ∈ cluster for i in 1:50, j in 1:50])
-    @test Ising.wolff_cluster(spins, 1, 1) == cluster
-    @test cluster[1,1]
+    cluster = CartesianIndices(σ) .∈ Ref(clset)
+    #cluster = BitMatrix([(i,j) ∈ cluster for i in 1:50, j in 1:50])
+    @test cluster[CartesianIndex(1,1)]
+    @test Ising.wolff_cluster(σ, CartesianIndex(1,1)) == cluster
 
-    cluster = Ising.wolff_cluster(spins, 1, 1)
-    for i in 1:50, j in 1:50
-        if cluster[i,j]
-            for (x, y) in Ising.neighbors(spins, i, j)
-                if !cluster[x,y]
+    cluster = Ising.wolff_cluster(σ, CartesianIndex(1,1))
+    for i in CartesianIndices(σ)
+        if cluster[i]
+            for x in Ising.neighbors(CartesianIndices(σ), i)
+                if !cluster[x]
                     # at zero temperature, spins not in cluster have different sign
-                    @test spins[x,y] ≠ spins[1, 1]
+                    @test σ[x] ≠ σ[CartesianIndex(1,1)]
                 end
             end
         end
@@ -58,10 +62,9 @@ end
 end
 
 @testset "flip_cluster" begin
-    σ = bitrand(64, 64)
-    s = Ising.ising.(σ)
+    σ = falses(64, 64)
     c = bitrand(64, 64)
+    σ0 = copy(σ)
     Ising.flip_cluster!(σ, c)
-    Ising.flip_cluster!(s, c)
-    @test s == Ising.ising.(σ)
+    @test (σ0 .!= σ) == c
 end

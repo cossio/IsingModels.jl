@@ -6,7 +6,6 @@ module IsingModels
     include("ising.jl")
 
     include("metropolis.jl")
-    include("metropolis_f.jl")
     include("wolff.jl")
     include("hybrid.jl")
 
