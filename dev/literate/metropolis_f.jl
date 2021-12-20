@@ -1,7 +1,7 @@
 # Examples using the Metropolis+F(M) sampling method
 
 #=
-The `metropolis_f!` method samples an energy of the form:
+The `metropolis!(...; f = f)` method samples an energy of the form:
 
 ```math
 E = -\sum_{\langle i,j\rangle} s_i s_j + f(M)
@@ -22,12 +22,19 @@ Also note that the temperature multiplies both the original Ising energy, and ``
 
 Therefore the system prefers configurations with *lower* values of `f(M)`.
 
-Let's look at some examples.
+We will consider the above energy with the modified term ``f(M) = w|M|/\beta``.
+Here ``|M|`` is the absolute value of the magnetization.
+``w`` is a factor that weights this term in the energy, and we divide by ``\beta``,
+so that the overall system looks like this:
+
+```math
+- \beta E = \beta\sum_{\langle i,j\rangle} s_i s_j - w|M|
+```
 
 First load required packages.
 =#
 
-import SquareIsingModel as Ising
+import IsingModels as Ising
 using Statistics, Random
 using LogExpFunctions, CairoMakie, IrrationalConstants
 nothing #hide
@@ -37,62 +44,41 @@ nothing #hide
 Random.seed!(1)
 nothing #hide
 
-# Define the temperatures we will consider.
+# Define the parameter ranges we will consider.
 
-βs = 0:0.025:1
+ws = 0:0.001:0.050 # weight of extra term
+Ls = [32, 64]
+βs = [0.4, 0.5, 0.6] # inverse temperatures
+cs = [:red, :purple, :blue] # colors
 nothing #hide
 
-#=
-We will consider the above energy with the modified term ``f(M) = w|M|/\beta``.
-Here ``|M|`` is the absolute value of the magnetization.
-``w`` is a factor that weights this term in the energy, and we divide by ``\beta``,
-so that the overall system looks like this:
+# Simulate and collect data.
 
-```math
-- \beta E = \beta\sum_{\langle i,j\rangle} s_i s_j - w|M|
-```
-=#
+magnetization_avg = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
+magnetization_std = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
 
-#=
-We now simulate a range of values of `w` and some system sizes.
-=#
+for β in βs, w in ws, L in Ls
+    f(M::Real) = w * abs(M) / β
+    σ = bitrand(L, L)
+    σ_t, M, E = Ising.metropolis!(σ, β; steps=10^7, f=f)
+    magnetization_avg[(β=β, w=w, L=L)] = mean(M)
+    magnetization_std[(β=β, w=w, L=L)] = std(M)
+end
 
-ws = [
-    1e-3 3e-3;
-    5e-3 7e-3;
-    9e-3 1e-2;
-    3e-2 5e-2;
-] # values of w
-Ls = [32, 64] # system size
 nothing #hide
 
-# Simulate!
+# Now let's plot the results.
 
-colors = [:blue, :red]
-fig = Figure(resolution=(450 * size(ws, 2), 250 * size(ws, 1)))
-for iw in CartesianIndices(ws),
-    w = ws[iw]
-    ax = Axis(fig[Tuple(iw)...], xlabel="β", ylabel="m", title="w=$w")
-    lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="Onsager's M")
-
-    for (iL, L) in enumerate(Ls)
-        mavg = zeros(length(βs))
-        mstd = zeros(length(βs))
-        spins = Ising.random_configuration(L)
-        for (k, β) in enumerate(βs)
-            f(M) = w * abs(M)
-            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-            m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
-            mavg[k] = mean(m)
-            mstd[k] = std(m)
-        end
-        scatter!(ax, βs, mavg, color=colors[iL], markersize=5, label="L=$L")
-        errorbars!(ax, βs, mavg, mstd/2, color=colors[iL], whiskerwidth=5)
+fig = Figure(resolution=(1000, 400))
+for (iL, L) in enumerate(Ls)
+    ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
+    for (iβ, (β, color)) in enumerate(zip(βs, cs))
+        mavg = [magnetization_avg[(β=β, w=w, L=L)] / L^2 for w in ws]
+        mstd = [magnetization_std[(β=β, w=w, L=L)] / L^2 for w in ws]
+        lines!(ax, ws, mavg, label="β=$β", color=color)
+        errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
-
-    if Tuple(iw) == (1, 1)
-        axislegend(ax, position=:lt)
-    end
+    axislegend(ax, position=:rt)
 end
 fig
 
@@ -104,41 +90,32 @@ We now try the function ``f(M) = \log\cosh(wM) / \beta``, so that:
 ```
 =#
 
-#=
-First let's define a function to compute `log(cosh(x))` in a numerically stable way.
-=#
+# First collect some data.
 
-function logcosh(x::Real)
-    abs_x = abs(x)
-    return abs_x + log1pexp(-2 * abs_x) - logtwo
+magnetization_avg = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
+magnetization_std = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Float64}()
+
+for β in βs, w in ws, L in Ls
+    f(M) = logcosh(w * M) / β
+    σ = bitrand(L, L)
+    σ_t, M, E = Ising.metropolis!(σ, β; steps=10^7, f=f)
+    magnetization_avg[(β=β, w=w, L=L)] = mean(M)
+    magnetization_std[(β=β, w=w, L=L)] = std(M)
 end
 
-# Now we are ready to run the simulation.
+nothing #hide
 
-colors = [:blue, :red]
-fig = Figure(resolution=(450 * size(ws, 2), 250 * size(ws, 1)))
-for iw in CartesianIndices(ws)
-    w = ws[iw]
-    ax = Axis(fig[Tuple(iw)...], xlabel="β", ylabel="m", title="w=$w")
-    lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="Onsager's M")
+# Now plot the result.
 
-    for (iL, L) in enumerate(Ls)
-        mavg = zeros(length(βs))
-        mstd = zeros(length(βs))
-        spins = Ising.random_configuration(L)
-        for (k, β) in enumerate(βs)
-            f(M) = logcosh(w * M)
-            spins_t, M, E = Ising.metropolis_f!(spins, β; steps=10^7, f=f)
-            m = abs.(M[(length(M) ÷ 2):end]) / length(spins)
-            mavg[k] = mean(m)
-            mstd[k] = std(m)
-        end
-        scatter!(ax, βs, mavg, color=colors[iL], markersize=5, label="L=$L")
-        errorbars!(ax, βs, mavg, mstd/2, color=colors[iL], whiskerwidth=5)
+fig = Figure(resolution=(1000, 400))
+for (iL, L) in enumerate(Ls)
+    ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
+    for (iβ, (β, color)) in enumerate(zip(βs, cs))
+        mavg = [magnetization_avg[(β=β, w=w, L=L)] / L^2 for w in ws]
+        mstd = [magnetization_std[(β=β, w=w, L=L)] / L^2 for w in ws]
+        lines!(ax, ws, mavg, label="β=$β", color=color)
+        errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
-
-    if Tuple(iw) == (1, 1)
-        axislegend(ax, position=:lt)
-    end
+    axislegend(ax, position=:rt)
 end
 fig
