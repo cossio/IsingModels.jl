@@ -4,7 +4,7 @@
 Critical temperature of the 2-dimensional infinite lattice Ising model determined
 by Onsager.
 """
-const βc = log(1 + √2) / 2
+const βc = log1p(√2) / 2
 
 """
     onsager_magnetization(β)
