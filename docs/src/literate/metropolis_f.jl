@@ -59,7 +59,7 @@ magnetization_std = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Floa
 
 for β in βs, w in ws, L in Ls
     f(M::Real) = w * abs(M) / β
-    σ = bitrand(L, L)
+    σ = trues(L, L)
     σ_t, M, E = Ising.metropolis!(σ, β; steps=10^7, f=f)
     magnetization_avg[(β=β, w=w, L=L)] = mean(M)
     magnetization_std[(β=β, w=w, L=L)] = std(M)
@@ -97,7 +97,7 @@ magnetization_std = Dict{typeof((β=first(βs), w=first(ws), L=first(Ls))), Floa
 
 for β in βs, w in ws, L in Ls
     f(M) = logcosh(w * M) / β
-    σ = bitrand(L, L)
+    σ = trues(L, L)
     σ_t, M, E = Ising.metropolis!(σ, β; steps=10^7, f=f)
     magnetization_avg[(β=β, w=w, L=L)] = mean(M)
     magnetization_std[(β=β, w=w, L=L)] = std(M)
