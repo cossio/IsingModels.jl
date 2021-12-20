@@ -78,8 +78,8 @@ for (iL, L) in enumerate(Ls)
         lines!(ax, ws, mavg, label="β=$β", color=color)
         errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
+    axislegend(ax, position=:rt)
 end
-axislegend(ax, position=:rt)
 fig
 
 #=
@@ -116,6 +116,6 @@ for (iL, L) in enumerate(Ls)
         lines!(ax, ws, mavg, label="β=$β", color=color)
         errorbars!(ax, ws, mavg, mstd/2, whiskerwidth=5, color=color)
     end
+    axislegend(ax, position=:rt)
 end
-axislegend(ax, position=:rt)
 fig

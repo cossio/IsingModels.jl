@@ -55,12 +55,35 @@ Sum of spins in neighbor sites of i.
 """
 function sum_neighbors(σ::IsingArray{D}, i::CartesianIndex{D}) where {D}
     @boundscheck @assert i ∈ CartesianIndices(σ)
-    c = sum(map(j -> σ[j], neighbors(CartesianIndices(σ), i)))
+    ne = neighbors(CartesianIndices(σ), i)
+    #@inbounds c = getindex.(Ref(σ), ne)
+    c = @inbounds sum(Base.Fix1(getindex, σ), ne)
+    #c = sum(map(j -> (@inbounds σ[j]), ne))
+#    c = sum(j -> (@inbounds σ[j]), ne)
     return 2 * (c - ndims(σ))
 end
 
+function _periodic(i::Int, L::Int)
+    @assert 0 ≤ i ≤ L + 1
+    if i < 1
+        return L
+    elseif i > L
+        return 1
+    else
+        return i
+    end
+end
+
 function neighbor(sz::IsingIndices{D}, i::CartesianIndex{D}, dim::Int, Δ::Int) where {D}
-    return CartesianIndex(ntuple(d -> d == dim ? mod1(i[d] + Δ, size(sz, d)) : i[d], D))
+    function idx(d)
+        if d == dim
+            @inbounds return _periodic(i[d] + Δ, size(sz, d))
+        else
+            @inbounds return i[d]
+        end
+    end
+    t = ntuple(idx, D)
+    return CartesianIndex(t)
 end
 
 function neighbors(sz::IsingIndices{D}, i::CartesianIndex{D}) where {D}
