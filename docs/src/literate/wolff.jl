@@ -10,6 +10,7 @@ import IsingModels as Ising
 using Statistics, CairoMakie, Random, ProgressMeter
 
 Random.seed!(1) # make reproducible
+nothing #hide
 
 #=
 First example.
@@ -47,13 +48,14 @@ errorbars!(ax, βs, mavg, mstd/2, color=:red, whiskerwidth=5)
 axislegend(ax, position=:rb)
 fig
 
-
+#=
 ## Typical Wolff clusters at criticality
+=#
 
 import IsingModels as Ising
 using Random, Colors, ColorSchemes, CairoMakie
 
-Random.seed!(62) # reproducibility
+Random.seed!(72) # reproducibility
 
 β = Ising.βc
 σ = bitrand(512, 512)
@@ -142,7 +144,7 @@ for t in 1:size(σ_t_metro, 3)
     heatmap!(ax, σ_t_metro[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
     hidedecorations!(ax)
 end
-for t in size(σ_t_wolff, 3)
+for t in 1:size(σ_t_wolff, 3)
     ax = Axis(fig[2,t], title="t=$t, wolff")
     heatmap!(ax, σ_t_wolff[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
     hidedecorations!(ax)
