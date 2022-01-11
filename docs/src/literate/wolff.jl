@@ -133,10 +133,10 @@ import IsingModels as Ising
 
 Random.seed!(3) # reproducibility
 
-L = 100
+L = 128
 N = L^2
-σ_t_metro, M_metro, E_metro = Ising.metropolis!(falses(128, 128), Ising.βc; steps=10^6, save_interval=2*10^5)
-σ_t_wolff, M_wolff, E_wolff = Ising.wolff!(falses(128, 128), Ising.βc, steps=10^4, save_interval=2*10^3)
+σ_t_metro, M_metro, E_metro = Ising.metropolis!(falses(L, L), Ising.βc; steps=10^6, save_interval=2*10^5)
+σ_t_wolff, M_wolff, E_wolff = Ising.wolff!(falses(L, L), Ising.βc, steps=10^4, save_interval=2*10^3)
 
 fig = Figure(resolution=(1000, 650))
 for t in 1:size(σ_t_metro, 3)
