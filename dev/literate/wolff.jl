@@ -7,9 +7,10 @@ First load some packages
 =#
 
 import IsingModels as Ising
-using Statistics, CairoMakie, Random, ProgressMeter
+using Statistics, CairoMakie, Random
 
 Random.seed!(1) # make reproducible
+nothing #hide
 
 #=
 First example.
@@ -23,7 +24,7 @@ lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="analytica
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 σ = bitrand(32, 32)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)
@@ -35,7 +36,7 @@ errorbars!(ax, βs, mavg, mstd/2, color=:blue, whiskerwidth=5)
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 σ = bitrand(64, 64)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)
@@ -47,13 +48,14 @@ errorbars!(ax, βs, mavg, mstd/2, color=:red, whiskerwidth=5)
 axislegend(ax, position=:rb)
 fig
 
-
+#=
 ## Typical Wolff clusters at criticality
+=#
 
 import IsingModels as Ising
 using Random, Colors, ColorSchemes, CairoMakie
 
-Random.seed!(62) # reproducibility
+Random.seed!(72) # reproducibility
 
 β = Ising.βc
 σ = bitrand(512, 512)
@@ -81,7 +83,7 @@ fig
 =#
 
 import IsingModels as Ising
-using Random, Statistics, Colors, ColorSchemes, CairoMakie, ProgressMeter
+using Random, Statistics, Colors, ColorSchemes, CairoMakie
 
 Random.seed!(1) # make reproducible
 
@@ -93,7 +95,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$", ylabel=L"average Wolff's cluster 
 clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 σ = bitrand(32, 32)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(σ))
@@ -106,7 +108,7 @@ errorbars!(ax, Ts, clavg, clstd/2, color=:blue, whiskerwidth=5)
 clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 σ = bitrand(64, 64)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(σ))
@@ -131,28 +133,29 @@ import IsingModels as Ising
 
 Random.seed!(3) # reproducibility
 
-L = 100
+L = 128
 N = L^2
-σ_t_metro, M_metro, E_metro = Ising.metropolis!(falses(128, 128), Ising.βc; steps=10^6, save_interval=2*10^5)
-σ_t_wolff, M_wolff, E_wolff = Ising.wolff!(falses(128, 128), Ising.βc, steps=10^4, save_interval=2*10^3)
+σ_t_metro, M_metro, E_metro = Ising.metropolis!(falses(L, L), Ising.βc; steps=10^6, save_interval=2*10^5)
+σ_t_wolff, M_wolff, E_wolff = Ising.wolff!(falses(L, L), Ising.βc, steps=10^4, save_interval=2*10^3)
 
 fig = Figure(resolution=(1000, 650))
 for t in 1:size(σ_t_metro, 3)
-    ax = Axis(fig[1,t], title="t=$t, metropolis")
-    heatmap!(ax, σ_t_metro[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+    ax = Axis(fig[1,1][1,t], title="t=$t, metropolis")
+    heatmap!(ax, σ_t_metro[:,:,t], colorrange=(0,1), colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
     hidedecorations!(ax)
 end
-for t in size(σ_t_wolff, 3)
-    ax = Axis(fig[2,t], title="t=$t, wolff")
-    heatmap!(ax, σ_t_wolff[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+for t in 1:size(σ_t_wolff, 3)
+    ax = Axis(fig[1,1][2,t], title="t=$t, wolff")
+    heatmap!(ax, σ_t_wolff[:,:,t], colorrange=(0,1), colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
     hidedecorations!(ax)
 end
 
-ax = Axis(fig[3,1:2], title="magnetization")
+ax = Axis(fig[2,1][1,1], title="magnetization")
 lines!(ax, M_wolff[1:10:end] / N, label="wolff")
 lines!(ax, M_metro[1:1000:end] / N, label="metropolis", linewidth=2, color=:red)
 ylims!(ax, (-1,1))
-ax = Axis(fig[3,3:4], title="energy")
+
+ax = Axis(fig[2,1][1,2], title="energy")
 lines!(ax, E_wolff[1:10:end] / N, label="wolff")
 lines!(ax, E_metro[1:1000:end] / N, label="metropolis", linewidth=2, color=:red)
 axislegend(ax, position = :rb)
