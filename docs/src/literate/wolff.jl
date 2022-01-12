@@ -139,7 +139,7 @@ N = L^2
 σ_t_metro, M_metro, E_metro = Ising.metropolis!(falses(L, L), Ising.βc; steps=10^6, save_interval=2*10^5)
 σ_t_wolff, M_wolff, E_wolff = Ising.wolff!(falses(L, L), Ising.βc, steps=10^4, save_interval=2*10^3)
 
-fig = Figure(resolution=(1000, 650))
+fig = Figure(resolution=(1000, 800))
 for t in 1:size(σ_t_metro, 3)
     ax = Axis(fig[1,1][1,t], title="t=$t, metropolis")
     heatmap!(ax, σ_t_metro[:,:,t], colorrange=(0,1), colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
