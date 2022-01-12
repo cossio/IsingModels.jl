@@ -5,7 +5,7 @@
 =#
 
 import IsingModels as Ising
-using Statistics, CairoMakie, Random, ProgressMeter
+using Statistics, CairoMakie, Random
 
 Random.seed!(1) # make reproducible
 
@@ -17,7 +17,7 @@ lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="analytica
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 σ = bitrand(32, 32)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.hybrid!(σ, β, steps=10^7)
     m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)
@@ -29,7 +29,7 @@ errorbars!(ax, βs, mavg, mstd/2, color=:blue, whiskerwidth=5)
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 σ = bitrand(64, 64)
-@showprogress for (k, β) in enumerate(βs)
+for (k, β) in enumerate(βs)
     σ_t, M, E = Ising.hybrid!(σ, β, steps=10^7)
     m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)

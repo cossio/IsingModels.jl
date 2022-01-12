@@ -7,7 +7,7 @@ First load some packages
 =#
 
 import IsingModels as Ising
-using Statistics, CairoMakie, Random, ProgressMeter
+using Statistics, CairoMakie, Random
 
 Random.seed!(1) # make reproducible
 nothing #hide
@@ -24,7 +24,7 @@ lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="analytica
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 σ = bitrand(32, 32)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)
@@ -36,7 +36,7 @@ errorbars!(ax, βs, mavg, mstd/2, color=:blue, whiskerwidth=5)
 mavg = zeros(length(βs))
 mstd = zeros(length(βs))
 σ = bitrand(64, 64)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     m = abs.(M[(length(M) ÷ 2):end]) / length(σ)
     mavg[k] = mean(m)
@@ -83,7 +83,7 @@ fig
 =#
 
 import IsingModels as Ising
-using Random, Statistics, Colors, ColorSchemes, CairoMakie, ProgressMeter
+using Random, Statistics, Colors, ColorSchemes, CairoMakie
 
 Random.seed!(1) # make reproducible
 
@@ -95,7 +95,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$", ylabel=L"average Wolff's cluster 
 clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 σ = bitrand(32, 32)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(σ))
@@ -108,7 +108,7 @@ errorbars!(ax, Ts, clavg, clstd/2, color=:blue, whiskerwidth=5)
 clavg = zeros(length(βs))
 clstd = zeros(length(βs))
 σ = bitrand(64, 64)
-@showprogress for (k,β) in enumerate(βs)
+for (k,β) in enumerate(βs)
     σ_t, M, E = Ising.wolff!(σ, β, steps=10^3)
     cluster_size = abs.(M[2:end] - M[1:(end - 1)]) .÷ 2
     clavg[k] = mean(cluster_size / length(σ))
