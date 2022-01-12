@@ -54,28 +54,20 @@ fig
 
 import IsingModels as Ising
 using Random, Colors, ColorSchemes, CairoMakie
-
-Random.seed!(72) # reproducibility
-
+Random.seed!(56) # reproducibility
 β = Ising.βc
 σ = bitrand(512, 512)
 Ising.metropolis!(σ, β; steps=10^7)
-Ising.wolff!(σ, β, steps=200)
-
+Ising.wolff!(σ, β, steps=500)
 cluster = Ising.wolff_cluster(σ, CartesianIndex(256, 256), Ising.wolff_padd(β))
 
-fig = Figure(resolution=(700, 300))
-
+fig = Figure(resolution=(700, 350))
 ax = Axis(fig[1,1], title="spins")
 hmap = heatmap!(ax, σ, colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
-cbar = Colorbar(fig[1,2], hmap)
-cbar.ticks = ([-0.5, 0.5], ["-1", "1"])
-
-ax = Axis(fig[1,3], title="cluster")
+hidedecorations!(ax)
+ax = Axis(fig[1,2], title="cluster")
 hmap = heatmap!(ax, cluster, colormap=cgrad([:white, :black], [0.5]; categorical=true))
-cbar = Colorbar(fig[1, 4], hmap)
-cbar.ticks = ([0.25, 0.75], ["0", "1"])
-
+hidedecorations!(ax)
 fig
 
 #=
