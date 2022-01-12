@@ -117,6 +117,7 @@ end
 scatter!(ax, Ts, clavg, color=:red, markersize=5, label="L=70")
 lines!(ax, Ts, clavg, color=:red)
 errorbars!(ax, Ts, clavg, clstd/2, color=:red, whiskerwidth=5)
+vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
 
 axislegend(ax, position=:rt)
 fig
