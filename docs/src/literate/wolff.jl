@@ -140,21 +140,22 @@ N = L^2
 
 fig = Figure(resolution=(1000, 650))
 for t in 1:size(σ_t_metro, 3)
-    ax = Axis(fig[1,t], title="t=$t, metropolis")
-    heatmap!(ax, σ_t_metro[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+    ax = Axis(fig[1,1][1,t], title="t=$t, metropolis")
+    heatmap!(ax, σ_t_metro[:,:,t], colorrange=(0,1), colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
     hidedecorations!(ax)
 end
 for t in 1:size(σ_t_wolff, 3)
-    ax = Axis(fig[2,t], title="t=$t, wolff")
-    heatmap!(ax, σ_t_wolff[:,:,t], colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
+    ax = Axis(fig[1,1][2,t], title="t=$t, wolff")
+    heatmap!(ax, σ_t_wolff[:,:,t], colorrange=(0,1), colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
     hidedecorations!(ax)
 end
 
-ax = Axis(fig[3,1:2], title="magnetization")
+ax = Axis(fig[2,1][1,1], title="magnetization")
 lines!(ax, M_wolff[1:10:end] / N, label="wolff")
 lines!(ax, M_metro[1:1000:end] / N, label="metropolis", linewidth=2, color=:red)
 ylims!(ax, (-1,1))
-ax = Axis(fig[3,3:4], title="energy")
+
+ax = Axis(fig[2,1][1,2], title="energy")
 lines!(ax, E_wolff[1:10:end] / N, label="wolff")
 lines!(ax, E_metro[1:1000:end] / N, label="metropolis", linewidth=2, color=:red)
 axislegend(ax, position = :rb)
