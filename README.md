@@ -6,3 +6,11 @@
 [![codecov](https://codecov.io/gh/cossio/IsingModels.jl/branch/main/graph/badge.svg?token=nRdk89G7HX)](https://codecov.io/gh/cossio/IsingModels.jl)
 
 Ising model in a 2-dimensional grid lattice.
+
+This package is not registered.
+Install with:
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/cossio/IsingModels.jl")
+```
