@@ -1,7 +1,7 @@
 name = "IsingModels"
 uuid = "723ee7ca-8220-4cb6-9f2e-031e2886e2e7"
 authors = "Jorge Fernandez-de-Cossio-Diaz <j.cossio.diaz@gmail.com>"
-version = "0.1.1-DEV"
+version = "0.1.1"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
