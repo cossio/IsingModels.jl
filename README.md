@@ -14,3 +14,9 @@ Install with:
 using Pkg
 Pkg.add(url="https://github.com/cossio/IsingModels.jl")
 ```
+
+## Citation
+
+This code is released as part of the supporting materials of https://arxiv.org/abs/2206.11600. If you use this package in a publication, please cite:
+
+* Fernandez-de-Cossio-Diaz, Jorge, Simona Cocco, and Remi Monasson. "Disentangling representations in Restricted Boltzmann Machines without adversaries." arXiv preprint arXiv:2206.11600 (2022)
