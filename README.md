@@ -7,12 +7,11 @@
 
 Ising model in a 2-dimensional grid lattice.
 
-This package is not registered.
-Install with:
+This package is registered. Install with:
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/cossio/IsingModels.jl")
+Pkg.add("IsingModels")
 ```
 
 ## Citation
