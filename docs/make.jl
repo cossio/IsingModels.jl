@@ -55,8 +55,7 @@ makedocs(
             "Metropolis+f(M)" => "literate/metropolis_f.md",
         ],
         "Reference" => "reference.md"
-    ],
-    strict = true
+    ]
 )
 
 #=
