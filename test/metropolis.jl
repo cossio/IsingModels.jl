@@ -1,4 +1,6 @@
-include("init.jl")
+using Test: @test, @testset, @inferred
+using Random: bitrand
+import IsingModels as Ising
 
 @testset "metropolis" begin
     L = 50; T = 100; Δ = 12; β = 1.0

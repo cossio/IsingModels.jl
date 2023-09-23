@@ -1,4 +1,6 @@
-include("init.jl")
+using Test: @test, @testset, @inferred
+using Random: bitrand
+import IsingModels as Ising
 
 @testset "wolff Padd" begin
     for β in 0:0.1:1

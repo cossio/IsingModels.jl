@@ -1,9 +1,7 @@
-using Test, SafeTestsets
-import IsingModels as Ising
-
-@safetestset "onsager" begin include("onsager.jl") end
-@safetestset "ising" begin include("ising.jl") end
-@safetestset "metropolis" begin include("metropolis.jl") end
-@safetestset "wolff" begin include("wolff.jl") end
-@safetestset "hybrid" begin include("hybrid.jl") end
-@safetestset "curie_weiss" begin include("curie_weiss.jl") end
+module aqua_tests include("aqua.jl") end
+module onsager_tests include("onsager.jl") end
+module ising_tests include("ising.jl") end
+module metropolis_tests include("metropolis.jl") end
+module wolff_tests include("wolff.jl") end
+module hybrid_tests include("hybrid.jl") end
+module curie_weiss_tests include("curie_weiss.jl") end

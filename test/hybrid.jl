@@ -1,4 +1,6 @@
-include("init.jl")
+using Test: @test, @testset, @inferred
+using Random: bitrand
+import IsingModels as Ising
 
 @testset "hybrid" begin
     L = 50; T = 10000; Δsave = 12; Δlocal = L

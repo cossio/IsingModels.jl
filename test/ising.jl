@@ -1,4 +1,6 @@
-include("init.jl")
+using Test: @test, @testset, @inferred
+using Random: bitrand
+import IsingModels as Ising
 
 @test Ising.spin(true) == 1
 @test Ising.spin(false) == -1

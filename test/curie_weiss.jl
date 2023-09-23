@@ -1,4 +1,6 @@
-include("init.jl")
+using Test: @testset, @test, @inferred
+using Random: bitrand
+import IsingModels as Ising
 
 @testset "Curie Weiss model" begin
     N = 128

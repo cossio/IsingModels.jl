@@ -1,4 +1,7 @@
-include("init.jl")
+using Test: @test, @testset, @inferred
+using Random: bitrand
+using Zygote
+import IsingModels as Ising
 
 @test Ising.βc ≈ 0.44068679350977151261630466248989615451408016413081770537664780432668
 
