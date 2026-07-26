@@ -69,7 +69,7 @@ nothing #hide
 
 # Now let's plot the results.
 
-fig = Figure(resolution=(1000, 400))
+fig = Figure(size=(1000, 400))
 for (iL, L) in enumerate(Ls)
     ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
     for (iβ, (β, color)) in enumerate(zip(βs, cs))
@@ -107,7 +107,7 @@ nothing #hide
 
 # Now plot the result.
 
-fig = Figure(resolution=(1000, 400))
+fig = Figure(size=(1000, 400))
 for (iL, L) in enumerate(Ls)
     ax = Axis(fig[1,iL], xlabel="w", ylabel="m", title="L=$L")
     for (iβ, (β, color)) in enumerate(zip(βs, cs))

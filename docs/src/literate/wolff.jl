@@ -17,7 +17,7 @@ First example.
 =#
 
 βs = 0:0.025:1
-fig = Figure(resolution=(600,400))
+fig = Figure(size=(600,400))
 ax = Axis(fig[1,1], xlabel="β", ylabel="m")
 lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="analytical")
 
@@ -61,7 +61,7 @@ Ising.metropolis!(σ, β; steps=10^7)
 Ising.wolff!(σ, β, steps=500)
 cluster = Ising.wolff_cluster(σ, CartesianIndex(256, 256), Ising.wolff_padd(β))
 
-fig = Figure(resolution=(700, 350))
+fig = Figure(size=(700, 350))
 ax = Axis(fig[1,1], title="spins")
 hmap = heatmap!(ax, σ, colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
 hidedecorations!(ax)
@@ -81,7 +81,7 @@ Random.seed!(1) # make reproducible
 
 Ts = 0:0.2:5
 βs = inv.(Ts)
-fig = Figure(resolution=(600,400))
+fig = Figure(size=(600,400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$", ylabel=L"average Wolff's cluster size / $N$")
 
 clavg = zeros(length(βs))
@@ -131,7 +131,7 @@ N = L^2
 σ_t_metro, M_metro, E_metro = Ising.metropolis!(falses(L, L), Ising.βc; steps=10^6, save_interval=2*10^5)
 σ_t_wolff, M_wolff, E_wolff = Ising.wolff!(falses(L, L), Ising.βc, steps=10^4, save_interval=2*10^3)
 
-fig = Figure(resolution=(1000, 800))
+fig = Figure(size=(1000, 800))
 for t in 1:size(σ_t_metro, 3)
     ax = Axis(fig[1,1][1,t], title="t=$t, metropolis")
     heatmap!(ax, σ_t_metro[:,:,t], colorrange=(0,1), colormap=cgrad([:purple, :orange], [0.5]; categorical=true))
@@ -169,7 +169,7 @@ Random.seed!(1) # make reproducible
 Ts = 2.2:0.01:2.3
 βs = inv.(Ts)
 
-fig = Figure(resolution=(600, 400))
+fig = Figure(size=(600, 400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="Binder parameter")
 @time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
     U = zeros(length(βs))
@@ -179,7 +179,7 @@ ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="Binder param
         U[k] = (3 - mean(M.^4) / mean(M.^2)^2) / 2
     end
     scatter!(ax, Ts, U, color=color, markersize=5, label=L"L=%$L")
-    lines!(ax, Ts, U, color=color, markersize=5)
+    lines!(ax, Ts, U, color=color)
 end
 vlines!(ax, [1 / Ising.βc], label=L"Onsager's $T_c$", color=:black, linestyle=:dash)
 axislegend(ax, position=:lb)
@@ -197,7 +197,7 @@ Random.seed!(1) # make reproducible
 Ts = 1.8:0.01:3
 βs = inv.(Ts)
 
-fig = Figure(resolution=(800, 400))
+fig = Figure(size=(800, 400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="heat capacity", limits=(extrema(Ts)..., 0,2))
 
 @time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
@@ -226,7 +226,7 @@ Random.seed!(1) # make reproducible
 Ts = 1.8:0.05:3
 βs = inv.(Ts)
 
-fig = Figure(resolution=(800, 400))
+fig = Figure(size=(800, 400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="internal energy")
 
 @time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
