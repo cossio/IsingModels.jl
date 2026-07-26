@@ -10,7 +10,7 @@ using Statistics, CairoMakie, Random
 Random.seed!(1) # make reproducible
 
 βs = 0:0.025:1
-fig = Figure(resolution=(600,400))
+fig = Figure(size=(600,400))
 ax = Axis(fig[1,1], xlabel="β", ylabel="m")
 lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="analytical")
 
@@ -54,7 +54,7 @@ Random.seed!(5) # make reproducible
 σ = bitrand(32, 32)
 Ising.metropolis!(σ, β; steps=10^6) # equilibrate a bit to get some clusters
 σ_t, M, E = Ising.hybrid!(σ, β; steps=20, save_interval = 1, local_steps = Δ)
-fig = Figure(resolution=(600, 500))
+fig = Figure(size=(600, 500))
 for t ∈ 1:size(σ_t, 3)
     ax = Axis(fig[cld(t, Δ), mod1(t, Δ)])
     hidedecorations!(ax)
@@ -80,7 +80,7 @@ Random.seed!(1) # make reproducible
 Ts = 2:0.01:3
 βs = inv.(Ts)
 
-fig = Figure(resolution=(600, 400))
+fig = Figure(size=(600, 400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="susceptibility", yscale=log10)
 @time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
     χ = zeros(length(βs))
@@ -107,7 +107,7 @@ Random.seed!(1) # make reproducible
 Ts = 1.5:0.01:3
 βs = inv.(Ts)
 
-fig = Figure(resolution=(600, 400))
+fig = Figure(size=(600, 400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="heat capacity", yscale=log10)
 @time for (L, color) in zip([4, 8, 16, 32], [:green, :orange, :blue, :red])
     C = zeros(length(βs))
@@ -138,7 +138,7 @@ Random.seed!(1) # make reproducible
 Ts = 1:0.5:5
 βs = inv.(Ts)
 
-fig = Figure(resolution=(600, 400))
+fig = Figure(size=(600, 400))
 ax = Axis(fig[1,1], xlabel=L"temperature $T$ ($=1/\beta$)", ylabel="spin flips / second", yscale=log10)
 @time for (L, color) in zip([4, 8, 16, 32], [:blue, :red, :orange, :green])
     wolff_rates = zeros(length(βs))
