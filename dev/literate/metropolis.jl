@@ -18,7 +18,7 @@ Simulate a range of temperatures.
 Compare to analytical magnetization.
 =#
 
-fig = Figure(resolution=(600,400))
+fig = Figure(size=(600,400))
 ax = Axis(fig[1,1], xlabel="β", ylabel="m")
 lines!(ax, 0:0.01:1, Ising.onsager_magnetization, color=:black, label="analytical")
 
