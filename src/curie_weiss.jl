@@ -21,10 +21,10 @@ function mf_random_configurations(
     N::Int, β::Real, h::Real = false; f = nothing, B::Int = 1
 )
     Ms = mf_random_magnetizations(N, β, h; f = f, B = B)
-    @assert all(iseven, M .+ N)
+    @assert all(iseven, Ms .+ N)
     σ = falses(N, B)
     for (b, M) in zip(1:B, Ms)
-        mf_random_configuration!(view(σ, :, b), M)
+        mf_random_magnetized_configuration!(view(σ, :, b), M)
     end
     return σ
 end
@@ -70,7 +70,7 @@ M = \sum_{i=1}^N s_i
 that follows the statistics of the mean-field (MF) Curie-Weiss model, with energy function:
 
 ```math
-E = -\sum_{i < j} s_i s_j - h * \sum_i s_i + f(M)
+E = -\frac{1}{N} \sum_{i < j} s_i s_j - h * \sum_i s_i + f(M)
 ```
 
 By default f(M) = 0.
@@ -80,8 +80,10 @@ By default f(M) = 0.
 function mf_random_magnetizations(
     N::Int, β::Real, h::Real = false; f = nothing, B::Int = 1
 )
-    E(M) = SpecialFunctions.logabsbinomial(N, M) + M^2 / 2N + h * M - f(M)
-    p = LogExpFunctions.softmax(-β * E.(-N:2:N))
-    Np = rand(Distributions.Categorical(p), B)
-    return 2Np .- N
+    Ms = -N:2:N
+    E(M) = -M^2 / 2N - h * M + (isnothing(f) ? 0 : f(M))
+    # log of number of configurations with magnetization M, (N + M)/2 spins up
+    S(M) = first(SpecialFunctions.logabsbinomial(N, (N + M) ÷ 2))
+    p = LogExpFunctions.softmax(S.(Ms) - β * E.(Ms))
+    return Ms[rand(Distributions.Categorical(p), B)]
 end

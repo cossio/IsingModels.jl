@@ -20,6 +20,15 @@ end
     @test E[1:Δ:end] == Ising.energy.(eachslice(σ_t; dims=3))
 end
 
+@testset "wolff Array{Bool}" begin
+    L = 10; T = 100; Δ = 12
+    σ = rand(Bool, L, L)
+    σ_t, M, E = @inferred Ising.wolff!(σ, Ising.βc; steps=T, save_interval=Δ)
+    @test M[end] == Ising.magnetization(σ)
+    @test E[end] == Ising.energy(σ)
+    @test M[1:Δ:end] == Ising.magnetization.(eachslice(σ_t; dims=3))
+end
+
 @testset "wolff cluster" begin
     σ = bitrand(50, 50)
     @inferred Ising.metropolis!(σ, Ising.βc; steps=10^6)

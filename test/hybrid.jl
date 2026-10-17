@@ -25,3 +25,16 @@ end
     @test M[1:Δsave:end] == Ising.magnetization.(eachslice(σ_t; dims=3))
     @test E[1:Δsave:end] == Ising.energy.(eachslice(σ_t; dims=3))
 end
+
+@testset "hybrid, D = $D" for D in (1, 3)
+    T = 1000; Δsave = 12
+    σ = bitrand(ntuple(_ -> 6, D)...)
+    for sampler! in (Ising.hybrid!, Ising.dynamic_hybrid!)
+        σ_t, M, E = sampler!(σ, Ising.βc; steps=T, save_interval=Δsave)
+        @test size(σ_t) == (size(σ)..., length(1:Δsave:T))
+        @test M[end] == Ising.magnetization(σ)
+        @test E[end] == Ising.energy(σ)
+        @test M[1:Δsave:end] == Ising.magnetization.(eachslice(σ_t; dims=D + 1))
+        @test E[1:Δsave:end] == Ising.energy.(eachslice(σ_t; dims=D + 1))
+    end
+end

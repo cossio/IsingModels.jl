@@ -25,7 +25,7 @@ function hybrid!(
 
     #= Track the history of configurations only every 'save_interval' steps. =#
     σ_t = falses(size(σ)..., length(1:save_interval:steps))
-    σ_t[:,:,1] .= σ
+    selectdim(σ_t, ndims(σ) + 1, 1) .= σ
 
     Padd = wolff_padd(β)
 
@@ -36,7 +36,7 @@ function hybrid!(
             metropolis_step!(σ; t = t, M = M, E = E, β = β)
         end
         if t ∈ 1:save_interval:steps
-            σ_t[:, :, cld(t, save_interval)] .= σ
+            selectdim(σ_t, ndims(σ) + 1, cld(t, save_interval)) .= σ
         end
     end
 
@@ -75,7 +75,7 @@ function dynamic_hybrid!(
 
     #= Track the history of configurations only every 'save_interval' steps. =#
     σ_t = falses(size(σ)..., length(1:save_interval:steps))
-    σ_t[:,:,1] .= σ
+    selectdim(σ_t, ndims(σ) + 1, 1) .= σ
 
     Padd = wolff_padd(β)
 
@@ -92,7 +92,7 @@ function dynamic_hybrid!(
             end
         end
         if t ∈ 1:save_interval:steps
-            σ_t[:, :, cld(t, save_interval)] .= σ
+            selectdim(σ_t, ndims(σ) + 1, cld(t, save_interval)) .= σ
         end
     end
 

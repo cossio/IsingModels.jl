@@ -12,6 +12,18 @@ import IsingModels as Ising
     @test Ising.onsager_magnetization(100) ≈ 1
 end
 
+@testset "Onsager internal energy at criticality" begin
+    @test Ising.onsager_internal_energy(Ising.βc) ≈ -√2
+    @test Ising.onsager_internal_energy(prevfloat(Ising.βc)) ≈ -√2
+    @test Ising.onsager_internal_energy(nextfloat(Ising.βc)) ≈ -√2
+    @test Ising.onsager_internal_energy(Ising.βc + 1e-9) ≈ -√2 rtol=1e-6
+    @test Ising.onsager_internal_energy(Ising.βc - 1e-9) ≈ -√2 rtol=1e-6
+    for β in Ising.βc .+ (-1e-7:1e-9:1e-7)
+        @test isfinite(Ising.onsager_internal_energy(β))
+        @test Ising.onsager_heat_capacity(β) > 0
+    end
+end
+
 @testset "Kramers-Wannier duality" begin
     @test Ising.kramers_wannier(Ising.βc) ≈ Ising.βc
     @test isinf(Ising.kramers_wannier(0))
