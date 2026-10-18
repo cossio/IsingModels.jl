@@ -26,3 +26,12 @@ end
     @test M[1:Δ:end] ≈ Ising.magnetization.(eachslice(σ_t; dims=3))
     @test E[1:Δ:end] ≈ Ising.energy.(eachslice(σ_t; dims=3); f=f)
 end
+
+@testset "metropolis Array{Bool}" begin
+    L = 10; T = 100; Δ = 12
+    σ = rand(Bool, L, L)
+    σ_t, M, E = @inferred Ising.metropolis!(σ, 1.0; steps=T, save_interval=Δ)
+    @test M[end] == Ising.magnetization(σ)
+    @test E[end] == Ising.energy(σ)
+    @test M[1:Δ:end] == Ising.magnetization.(eachslice(σ_t; dims=3))
+end

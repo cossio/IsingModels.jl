@@ -40,6 +40,17 @@ end
     end
 end
 
+@testset "hybrid samplers with Array{Bool}" begin
+    T = 1000; Δsave = 12
+    σ = rand(Bool, 8, 8)
+    for sampler! in (Ising.hybrid!, Ising.dynamic_hybrid!)
+        σ_t, M, E = sampler!(σ, Ising.βc; steps=T, save_interval=Δsave)
+        @test M[end] == Ising.magnetization(σ)
+        @test E[end] == Ising.energy(σ)
+        @test M[1:Δsave:end] == Ising.magnetization.(eachslice(σ_t; dims=3))
+    end
+end
+
 @testset "hybrid samplers vs. exact enumeration" begin
     # 3x3 lattice, small enough to enumerate all configurations
     L = 3; β = 0.4
