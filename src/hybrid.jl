@@ -28,10 +28,11 @@ function hybrid!(
     σ_t[:,:,1] .= σ
 
     Padd = wolff_padd(β)
+    cluster = falses(size(σ)) # reused across Wolff steps
 
     for t ∈ 2:steps
         if t ∈ 1:local_steps:steps # Wolff step
-            wolff_step!(σ; t = t, M = M, E = E, Padd = Padd)
+            wolff_step!(σ; t = t, M = M, E = E, Padd = Padd, cluster = cluster)
         else # Metropolis step
             metropolis_step!(σ; t = t, M = M, E = E, β = β)
         end
@@ -78,11 +79,12 @@ function dynamic_hybrid!(
     σ_t[:,:,1] .= σ
 
     Padd = wolff_padd(β)
+    cluster = falses(size(σ)) # reused across Wolff steps
 
     for t ∈ 2:steps
         if hybrid_decide(hybrid_stats, length(σ))
             hybrid_stats.wolff_time += @elapsed begin
-                flipped = wolff_step!(σ; t = t, M = M, E = E, Padd = Padd)
+                flipped = wolff_step!(σ; t = t, M = M, E = E, Padd = Padd, cluster = cluster)
                 hybrid_stats.wolff_flip += flipped
             end
         else

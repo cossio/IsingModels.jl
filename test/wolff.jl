@@ -20,6 +20,31 @@ end
     @test E[1:Δ:end] == Ising.energy.(eachslice(σ_t; dims=3))
 end
 
+@testset "wolff energy at every step" begin
+    # dimensions of size 1 and 2 have coinciding neighbors; also 1-D and 3-D lattices
+    sizes = ((7,), (2, 5), (1, 6), (8, 8), (2, 2, 2), (3, 2, 4), (5, 5, 5))
+    for sz in sizes, β in (0, 0.2, Ising.βc, 1, Inf)
+        σ = bitrand(sz)
+        σ_t, M, E = Ising.wolff!(σ, β; steps=300, save_interval=1)
+        @test M == Ising.magnetization.(eachslice(σ_t; dims=length(sz) + 1))
+        @test E == Ising.energy.(eachslice(σ_t; dims=length(sz) + 1))
+        @test E[end] == Ising.energy(σ)
+    end
+end
+
+@testset "wolff_step! cluster buffer" begin
+    σ = bitrand(20, 20)
+    σ0 = copy(σ)
+    M = [Ising.magnetization(σ), 0]
+    E = [Ising.energy(σ), 0]
+    cluster = falses(size(σ))
+    cluster_size = Ising.wolff_step!(σ; t=2, M, E, Padd=Ising.wolff_padd(Ising.βc), cluster)
+    @test !any(cluster) # left clean for the next step
+    @test count(σ .!= σ0) == cluster_size
+    @test M[2] == Ising.magnetization(σ)
+    @test E[2] == Ising.energy(σ)
+end
+
 @testset "wolff cluster" begin
     σ = bitrand(50, 50)
     @inferred Ising.metropolis!(σ, Ising.βc; steps=10^6)
@@ -31,6 +56,11 @@ end
 
     # all cluster spins have same sign as the center
     @test cluster .* σ == σ[i_seed] * cluster
+
+    # wolff_cluster! marks the same sites it returns
+    cluster = falses(size(σ))
+    sites = Ising.wolff_cluster!(cluster, σ, i_seed, Ising.wolff_padd(Ising.βc))
+    @test sort(sites) == findall(cluster)
 
     # zero temperature cluster
     σ = bitrand(50, 50)

@@ -25,3 +25,17 @@ end
     @test M[1:Δsave:end] == Ising.magnetization.(eachslice(σ_t; dims=3))
     @test E[1:Δsave:end] == Ising.energy.(eachslice(σ_t; dims=3))
 end
+
+@testset "hybrid energy at every step" begin
+    for sz in ((2, 5), (8, 8)), β in (0.2, Ising.βc, 1)
+        σ = bitrand(sz)
+        σ_t, M, E = Ising.hybrid!(σ, β; steps=500, save_interval=1, local_steps=7)
+        @test M == Ising.magnetization.(eachslice(σ_t; dims=3))
+        @test E == Ising.energy.(eachslice(σ_t; dims=3))
+
+        σ = bitrand(sz)
+        σ_t, M, E = Ising.dynamic_hybrid!(σ, β; steps=500, save_interval=1)
+        @test M == Ising.magnetization.(eachslice(σ_t; dims=3))
+        @test E == Ising.energy.(eachslice(σ_t; dims=3))
+    end
+end
