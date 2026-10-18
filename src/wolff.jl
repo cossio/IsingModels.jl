@@ -43,7 +43,7 @@ function wolff!(
     return σ_t, M, E
 end
 
-function wolff_step!(σ::BitArray; t, M, E, Padd)
+function wolff_step!(σ::IsingArray; t, M, E, Padd)
     i = rand(CartesianIndices(σ))
     cluster = wolff_cluster(σ, i, Padd)
     cluster_size = sum(cluster)
@@ -54,7 +54,7 @@ function wolff_step!(σ::BitArray; t, M, E, Padd)
     return cluster_size
 end
 
-function flip_cluster!(σ::BitArray, cluster::BitArray)
+function flip_cluster!(σ::IsingArray, cluster::IsingArray)
     σ .= ifelse.(cluster, flip.(σ), σ)
     return σ
 end

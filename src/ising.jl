@@ -119,7 +119,7 @@ function ising_distance(
     sz::IsingIndices{D}, i::CartesianIndex{D}, j::CartesianIndex{D}
 ) where {D}
     @boundscheck @assert i ∈ sz && j ∈ sz
-    ds = ising_axis_distance.(size(sz), Tuple(i - j))
+    ds = ising_axis_distance.(size(sz), Tuple(i), Tuple(j))
     return norm(ds)
 end
 

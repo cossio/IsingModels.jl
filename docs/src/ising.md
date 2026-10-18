@@ -39,3 +39,13 @@ Onsager, Lars. "Crystal statistics. I. A two-dimensional model with an order-dis
 ```
 
 See [`onsager_internal_energy`](@ref Ising.onsager_internal_energy) and [`onsager_heat_capacity`](@ref Ising.onsager_heat_capacity), implemented in this package.
+
+## Spin configurations
+
+Spin configurations are arrays of `Bool`, where `true` is spin ``+1`` and `false` is spin ``-1`` (see [`spin`](@ref Ising.spin) and [`binary`](@ref Ising.binary)).
+Any `AbstractArray{Bool}` works: a `BitArray` (from `bitrand`, `trues` or `falses`), an `Array{Bool}` (from `rand(Bool, L, K)`), or a view of either.
+
+A `BitArray` stores one spin per bit, using 8 times less memory than an `Array{Bool}`, which stores one spin per byte.
+Reading or writing a single spin takes a bit more work in a `BitArray`, so an `Array{Bool}` is usually faster for lattices that fit in the CPU cache.
+For very large lattices, the smaller memory footprint of a `BitArray` can make it faster instead.
+The configurations saved during a simulation are always stored in a `BitArray`.

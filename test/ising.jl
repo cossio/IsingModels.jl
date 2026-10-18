@@ -28,7 +28,7 @@ end
     end
 
     σ = bitrand(3, 3)
-    Ising.sum_neighbors(σ, CartesianIndex(2,2)) == (
+    @test Ising.sum_neighbors(σ, CartesianIndex(2,2)) == (
         Ising.spin(σ[1,2]) + Ising.spin(σ[3,2]) +
         Ising.spin(σ[2,1]) + Ising.spin(σ[2,3])
     )
@@ -65,4 +65,14 @@ end
     @test 2Ising.energy(σ) == E
     h = randn()
     @test Ising.energy(σ, h) ≈ Ising.energy(σ) - h * Ising.magnetization(σ)
+end
+
+@testset "ising_distance" begin
+    sz = CartesianIndices((10, 12))
+    @test Ising.ising_distance(sz, CartesianIndex(1, 1), CartesianIndex(1, 1)) == 0
+    @test Ising.ising_distance(sz, CartesianIndex(1, 1), CartesianIndex(10, 12)) ≈ √2
+    @test Ising.ising_distance(sz, CartesianIndex(1, 1), CartesianIndex(6, 1)) == 5
+    @test Ising.ising_distance(sz, CartesianIndex(1, 1), CartesianIndex(7, 1)) == 4
+    @test Ising.ising_distance(sz, CartesianIndex(2, 3), CartesianIndex(5, 9)) ≈ hypot(3, 6)
+    @test Ising.ising_distance(sz, CartesianIndex(5, 9), CartesianIndex(2, 3)) ≈ hypot(3, 6)
 end
