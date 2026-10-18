@@ -57,10 +57,13 @@ end
     # all cluster spins have same sign as the center
     @test cluster .* σ == σ[i_seed] * cluster
 
-    # wolff_cluster! marks the same sites it returns
+    # wolff_flip! marks the sites it returns, flips them, and returns the energy change
+    σ_flip = copy(σ)
     cluster = falses(size(σ))
-    sites = Ising.wolff_cluster!(cluster, σ, i_seed, Ising.wolff_padd(Ising.βc))
+    sites, ΔE = Ising.wolff_flip!(cluster, σ_flip, i_seed, Ising.wolff_padd(Ising.βc))
     @test sort(sites) == findall(cluster)
+    @test (σ_flip .!= σ) == cluster
+    @test ΔE == Ising.energy(σ_flip) - Ising.energy(σ)
 
     # zero temperature cluster
     σ = bitrand(50, 50)
