@@ -71,7 +71,7 @@ function wolff!(
 end
 
 # `queued` is the work buffer of `wolff_flip!`, which can be reused across steps.
-function wolff_step!(σ::BitArray; t, M, E, Padd, queued::BitArray = falses(size(σ)))
+function wolff_step!(σ::IsingArray; t, M, E, Padd, queued::IsingArray = falses(size(σ)))
     i = rand(CartesianIndices(σ))
     ΔM = -2spin(σ[i])
     cluster_size, ΔE = wolff_flip!(queued, σ, i, Padd)
@@ -80,7 +80,7 @@ function wolff_step!(σ::BitArray; t, M, E, Padd, queued::BitArray = falses(size
     return cluster_size
 end
 
-function flip_cluster!(σ::BitArray, cluster::BitArray)
+function flip_cluster!(σ::IsingArray, cluster::IsingArray)
     σ .= ifelse.(cluster, flip.(σ), σ)
     return σ
 end
