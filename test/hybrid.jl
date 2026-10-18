@@ -1,5 +1,6 @@
 using Test: @test, @testset, @inferred
 using Random: bitrand
+using Statistics: mean
 import IsingModels as Ising
 
 @testset "hybrid" begin
@@ -36,5 +37,18 @@ end
         @test E[end] == Ising.energy(σ)
         @test M[1:Δsave:end] == Ising.magnetization.(eachslice(σ_t; dims=D + 1))
         @test E[1:Δsave:end] == Ising.energy.(eachslice(σ_t; dims=D + 1))
+    end
+end
+
+@testset "hybrid samplers vs. exact enumeration" begin
+    # 3x3 lattice, small enough to enumerate all configurations
+    L = 3; β = 0.4
+    confs = [BitMatrix(reshape(digits(k; base=2, pad=L^2) .== 1, L, L)) for k in 0:(2^(L^2) - 1)]
+    Es = Ising.energy.(confs)
+    w = exp.(-β * Es)
+    E_exact = sum(w .* Es) / sum(w)
+    for sampler! in (Ising.hybrid!, Ising.dynamic_hybrid!)
+        _, _, E = sampler!(bitrand(L, L), β; steps=10^6)
+        @test mean(E) ≈ E_exact atol=0.3
     end
 end
