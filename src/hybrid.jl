@@ -28,10 +28,11 @@ function hybrid!(
     selectdim(σ_t, ndims(σ) + 1, 1) .= σ
 
     Padd = wolff_padd(β)
+    queued = falses(size(σ)) # Wolff work buffer, reused across steps
 
     for t ∈ 2:steps
         if t ∈ 1:local_steps:steps # Wolff step
-            wolff_step!(σ; t = t, M = M, E = E, Padd = Padd)
+            wolff_step!(σ; t = t, M = M, E = E, Padd = Padd, queued = queued)
         else # Metropolis step
             metropolis_step!(σ; t = t, M = M, E = E, β = β)
         end
@@ -81,11 +82,12 @@ function dynamic_hybrid!(
     selectdim(σ_t, ndims(σ) + 1, 1) .= σ
 
     Padd = wolff_padd(β)
+    queued = falses(size(σ)) # Wolff work buffer, reused across steps
 
     for t ∈ 2:steps
         if hybrid_decide(hybrid_stats)
             hybrid_stats.wolff_time += @elapsed begin
-                flipped = wolff_step!(σ; t = t, M = M, E = E, Padd = Padd)
+                flipped = wolff_step!(σ; t = t, M = M, E = E, Padd = Padd, queued = queued)
                 hybrid_stats.wolff_flip += flipped
             end
         else
