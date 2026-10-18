@@ -1,46 +1,43 @@
 function wolff_cluster(s::IsingArray{D}, i::CartesianIndex{D}, Padd::Real = 1) where {D}
-    cluster = falses(size(s)...)
-    wolff_flip!(cluster, copy(s), i, Padd) # flips a copy, leaving `s` unchanged
-    return cluster
+    σ = copy(s)
+    wolff_flip!(falses(size(s)), σ, i, Padd)
+    return σ .!= s # the flipped sites
 end
 
-# Grows a Wolff cluster from the seed `i` and flips it, marking its sites in `cluster`,
-# which must be all `false` on entry. Returns the list of cluster sites and the energy
-# change of the flip.
+# Grows a Wolff cluster from the seed `i` and flips it. Returns the cluster size and the
+# energy change. `queued` is a work buffer of the size of `σ`, which must be all `false`:
+# it marks the cluster sites whose neighbors are not scanned yet, and is left all `false`.
 function wolff_flip!(
-    cluster::IsingArray{D}, σ::IsingArray{D}, i::CartesianIndex{D}, Padd::Real = 1
+    queued::IsingArray{D}, σ::IsingArray{D}, i::CartesianIndex{D}, Padd::Real = 1
 ) where {D}
-    σi = σ[i] # spin of all cluster sites before the flip
-    # The flip changes the sign of the bonds between the cluster and outside sites, so
-    # ΔE = 2(n_same - n_opp), counting these bonds by whether the outside spin is the same
-    # or opposite. Over the 2D bonds of each cluster site, n_same = 2D|C| - n_opp - n_in,
-    # where n_in counts bonds with both ends in the cluster, once from each end. Like
-    # `energy`, this counts a bond twice along a dimension of size 2.
-    n_opp = n_in = 0
-    cluster[i] = true
-    sites = [i]
+    @assert size(queued) == size(σ)
+    σi = σ[i] # spin of the cluster sites before the flip
+    queued[i] = true
     queue = [i]
+    cluster_size = 0
+    up = 0 # up neighbors of the cluster sites, each counted just before the site flips
     while !isempty(queue)
         j = pop!(queue)
         for x in neighbors(CartesianIndices(σ), j)
-            if cluster[x]
-                if σ[x] != σi # x was processed and flipped before j, so count both ends now
-                    n_in += 2
-                elseif x == j # j is its own neighbor along a dimension of size 1
-                    n_in += 1
-                end
-            elseif σ[x] != σi
-                n_opp += 1
-            elseif rand() < Padd
-                cluster[x] = true
+            σx = @inbounds σ[x]
+            up += σx
+            # sites already in the cluster are either queued, or flipped to !σi
+            if !(@inbounds queued[x]) && σx == σi && rand() < Padd
+                @inbounds queued[x] = true
                 push!(queue, x)
-                push!(sites, x)
             end
         end
-        σ[j] = flip(σ[j])
+        @inbounds σ[j] = flip(σ[j])
+        @inbounds queued[j] = false
+        cluster_size += 1
     end
-    n_same = 2D * length(sites) - n_opp - n_in
-    return sites, 2(n_same - n_opp)
+    # This flips the cluster one site at a time. Flipping j changes the energy by
+    # 2 s_j Σ_x s_x over its 2D neighbors x, where s_j = spin(σi), and Σ_x s_x is the
+    # number of up neighbors minus down neighbors at that time. Along a dimension of size 1,
+    # j is its own neighbor, but this bond doesn't change, so its 4 is subtracted.
+    n1 = count(==(1), size(σ))
+    ΔE = 2spin(σi) * (2up - 2D * cluster_size) - 4n1 * cluster_size
+    return cluster_size, ΔE
 end
 
 """
@@ -63,9 +60,9 @@ function wolff!(
     selectdim(σ_t, ndims(σ) + 1, 1) .= σ
 
     Padd = wolff_padd(β)
-    cluster = falses(size(σ)) # reused across steps
+    queued = falses(size(σ)) # work buffer, reused across steps
     for t in 2:steps
-        wolff_step!(σ; t = t, M = M, E = E, Padd = Padd, cluster = cluster)
+        wolff_step!(σ; t = t, M = M, E = E, Padd = Padd, queued = queued)
         if t ∈ 1:save_interval:steps
             selectdim(σ_t, ndims(σ) + 1, cld(t, save_interval)) .= σ
         end
@@ -73,14 +70,11 @@ function wolff!(
     return σ_t, M, E
 end
 
-# `cluster` is a work buffer of the size of `σ`. It must be all `false` on entry, and is
-# left all `false` on exit, so it can be reused across steps.
-function wolff_step!(σ::BitArray; t, M, E, Padd, cluster::BitArray = falses(size(σ)))
+# `queued` is the work buffer of `wolff_flip!`, which can be reused across steps.
+function wolff_step!(σ::BitArray; t, M, E, Padd, queued::BitArray = falses(size(σ)))
     i = rand(CartesianIndices(σ))
     ΔM = -2spin(σ[i])
-    sites, ΔE = wolff_flip!(cluster, σ, i, Padd)
-    cluster[sites] .= false
-    cluster_size = length(sites)
+    cluster_size, ΔE = wolff_flip!(queued, σ, i, Padd)
     M[t] = M[t - 1] + ΔM * cluster_size
     E[t] = E[t - 1] + ΔE
     return cluster_size

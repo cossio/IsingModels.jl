@@ -32,14 +32,14 @@ end
     end
 end
 
-@testset "wolff_step! cluster buffer" begin
+@testset "wolff_step! work buffer" begin
     σ = bitrand(20, 20)
     σ0 = copy(σ)
     M = [Ising.magnetization(σ), 0]
     E = [Ising.energy(σ), 0]
-    cluster = falses(size(σ))
-    cluster_size = Ising.wolff_step!(σ; t=2, M, E, Padd=Ising.wolff_padd(Ising.βc), cluster)
-    @test !any(cluster) # left clean for the next step
+    queued = falses(size(σ))
+    cluster_size = Ising.wolff_step!(σ; t=2, M, E, Padd=Ising.wolff_padd(Ising.βc), queued)
+    @test !any(queued) # left clean for the next step
     @test count(σ .!= σ0) == cluster_size
     @test M[2] == Ising.magnetization(σ)
     @test E[2] == Ising.energy(σ)
@@ -49,7 +49,9 @@ end
     σ = bitrand(50, 50)
     @inferred Ising.metropolis!(σ, Ising.βc; steps=10^6)
     i_seed = rand(CartesianIndices(σ))
+    σ0 = copy(σ)
     cluster = @inferred Ising.wolff_cluster(σ, i_seed, Ising.wolff_padd(Ising.βc))
+    @test σ == σ0 # not modified
 
     # seed is always flipped
     @test cluster[i_seed]
@@ -57,12 +59,13 @@ end
     # all cluster spins have same sign as the center
     @test cluster .* σ == σ[i_seed] * cluster
 
-    # wolff_flip! marks the sites it returns, flips them, and returns the energy change
+    # wolff_flip! flips a cluster and returns its size and the energy change
     σ_flip = copy(σ)
-    cluster = falses(size(σ))
-    sites, ΔE = Ising.wolff_flip!(cluster, σ_flip, i_seed, Ising.wolff_padd(Ising.βc))
-    @test sort(sites) == findall(cluster)
-    @test (σ_flip .!= σ) == cluster
+    queued = falses(size(σ))
+    cluster_size, ΔE = Ising.wolff_flip!(queued, σ_flip, i_seed, Ising.wolff_padd(Ising.βc))
+    @test !any(queued)
+    @test count(σ_flip .!= σ) == cluster_size
+    @test σ_flip[i_seed] != σ[i_seed]
     @test ΔE == Ising.energy(σ_flip) - Ising.energy(σ)
 
     # zero temperature cluster
